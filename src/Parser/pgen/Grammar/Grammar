@@ -1,0 +1,114 @@
+line: [label] [op_code | pseudo_op | variable | region | macro ]  (NEWLINE|ENDMARKER)
+
+label: NAME [ ':' | '?']
+variable: ('=' | EQU) exp
+region: SEGMENT [PARA | PAGE | exp] | ENDS
+macro: '.' NAME ARG (',' ARG)* | MACRO NAME* | ENDM
+
+op_code: (group1 | group2  | group3  | group4  | group5  | group6  | group7  | group8  |
+          group9 | group10 | group11 | group12 | group13 | group14 | group15 | group16)
+
+group1: GROUP1_INST ([WIDE | SHORT] imm_exp | [LONG | DP | ZP] ni_exp [xys_index] | ind_exp | long_ind_exp)
+group2: GROUP2_INST [AREG | exp [x_index]]
+group3: GROUP3_INST [LONG | DP | ZP] exp
+group4: GROUP4_INST ([WIDE | SHORT] imm_exp | exp [x_index])
+group5: GROUP5_INST (imm_exp | exp)
+group6: GROUP6_INST [WIDE | SHORT] imm_exp
+group7: GROUP7_INST exp ',' exp
+group8: GROUP8_INST ([LONG] ni_exp | jmp_ind_exp | jmp_long_ind_exp)
+group9: GROUP9_INST ([LONG] exp | jmp_long_ind_exp)
+group10: GROUP10_INST ([LONG] ni_exp | jmp_ind_exp)
+group11: GROUP11_INST ([WIDE | SHORT] imm_exp | exp [y_index])
+group12: GROUP12_INST exp [y_index]
+group13: GROUP13_INST exp [x_index]
+group14: GROUP14_INST
+group15: GROUP15_INST '(' exp ')'
+group16: GROUP16_INST [[WIDE | SHORT] imm_exp]
+
+imm_exp: '#' exp
+long_ind_exp: '[' exp ']' [y_index]
+jmp_long_ind_exp: '[' exp ']'
+ind_exp: '(' exp (s_index ')' y_index | x_index ')' | ')' [is_exp | y_index])
+jmp_ind_exp: '(' exp (x_index ')' | ')' [jmp_is_exp])
+is_exp: ('||' and_cond tail_or_cond |
+         '&&' not_cond tail_and_cond |
+         comp_op or_exp tail_comparison |
+         '|' xor_expr tail_or_exp |
+         '^' and_expr tail_xor_expr |
+         '&' shift_expr tail_and_expr |
+         ('<<' | '>>') arith_expr tail_shift_expr |
+         ('+' | '-') term tail_arith_expr |
+         ('*' | '/' | '%') factor tail_term
+        ) [xys_index]
+jmp_is_exp: ('||' and_cond tail_or_cond |
+             '&&' not_cond tail_and_cond |
+             comp_op or_exp tail_comparison |
+             '|' xor_expr tail_or_exp |
+             '^' and_expr tail_xor_expr |
+             '&' shift_expr tail_and_expr |
+             ('<<' | '>>') arith_expr tail_shift_expr |
+             ('+' | '-') term tail_arith_expr |
+             ('*' | '/' | '%') factor tail_term
+            )
+
+tail_term: ('*' | '/' | '%' factor)* tail_arith_expr
+tail_arith_expr: (('+' | '-') term)* tail_shift_expr
+tail_shift_expr: (('<<' | '>>') arith_expr)* tail_and_expr
+tail_and_expr: ('&' shift_expr)* tail_xor_expr
+tail_xor_expr: ('^' and_expr)* tail_or_exp
+tail_or_exp: ('|' xor_expr)* tail_comparison
+tail_comparison: (comp_op or_exp)* tail_and_cond
+tail_and_cond: ('&&' not_cond)* tail_or_cond
+tail_or_cond: ('||' and_cond)*
+
+x_index: ',' XREG
+y_index: ',' YREG
+s_index: ',' SREG
+xy_index: ',' (XREG | YREG)
+xs_index: ',' (XREG | SREG)
+ys_index: ',' (YREG | SREG)
+xys_index: ',' (XREG | YREG | SREG)
+
+symbol: NAME [(':' | '&') | '.' [NAME]] | '.' NAME
+
+exp: and_cond ('||' and_cond)*
+and_cond: not_cond ('&&' not_cond)*
+not_cond: '!' not_cond | comparison
+comparison: or_exp (comp_op or_exp)*
+comp_op: '<' | '>' | '==' | '!=' | '>=' | '<='
+or_exp: xor_expr ('|' xor_expr)*
+xor_expr: and_expr ('^' and_expr)*
+and_expr: shift_expr ('&' shift_expr)*
+shift_expr: arith_expr (('<<' | '>>') arith_expr)*
+arith_expr: term (('+' | '-') term)*
+term: factor (('*' | '/' | '%') factor)*
+factor: ('+' | '-' | '~' | '<' | '>' | '>>' | '<<') factor | atom
+atom: ('(' exp ')') | STRING | NUMBER | symbol | '*'
+
+ni_exp: ni_and_cond ('||' and_cond)*
+ni_and_cond: ni_not_cond ('&&' not_cond)*
+ni_not_cond: '!' not_cond | ni_comparison
+ni_comparison: ni_or_exp (comp_op or_exp)*
+ni_or_exp: ni_xor_expr ('|' xor_expr)*
+ni_xor_expr: ni_and_expr ('^' and_expr)*
+ni_and_expr: ni_shift_expr ('&' shift_expr)*
+ni_shift_expr: ni_arith_expr (('<<' | '>>') arith_expr)*
+ni_arith_expr: ni_term (('+' | '-') term)*
+ni_term: ni_factor (('*' | '/' | '%') factor)*
+ni_factor: ('+' | '-' | '~' | '<' | '>' | '>>' | '<<') factor | ni_atom
+ni_atom: STRING | NUMBER | symbol | '*'
+
+pseudo_op: (CPU6502 | CPU65C02 | CPU65C816 | WIDEA | SHORTA | WIDEXY | SHORTXY | define_byte | define_word |
+            define_storage | align | block | END_BLOCK | if_def | iff | ELSE | ENDIF )
+
+define_byte: DB exp (',' exp)*
+define_word: (DW | DBW | DA) exp (',' exp)*
+define_storage: DS exp
+align: ALIGN (PARA | PAGE)
+block: BLOCK exp
+
+if_def: (IFDEF | IFNDEF) NAME
+iff: IF exp
+
+
+

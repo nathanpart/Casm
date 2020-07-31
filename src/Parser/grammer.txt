@@ -1,0 +1,3155 @@
+Processing rule lines
+Dump of NFA for lines
+  State 0 
+    label -> 1
+    -> 1
+    -> 2
+  State 1 
+    -> 3
+  State 2 
+    ENDMARKER -> 4
+  State 3 
+    -> 5
+    -> 6
+    -> 7
+    -> 8
+    -> 9
+    -> 10
+  State 4 (final)
+  State 5 
+    op_code -> 11
+  State 6 
+    pseudo_op -> 12
+  State 7 
+    variable -> 13
+  State 8 
+    region -> 14
+  State 9 
+    macro -> 15
+  State 10 
+    -> 16
+  State 11 
+    -> 10
+  State 12 
+    -> 10
+  State 13 
+    -> 10
+  State 14 
+    -> 10
+  State 15 
+    -> 10
+  State 16 
+    COMMENT -> 17
+    -> 17
+  State 17 
+    -> 18
+  State 18 
+    NEWLINE -> 19
+  State 19 
+    -> 0
+Dump of DFA for lines
+  State 0 
+    COMMENT -> 1
+    ENDMARKER -> 2
+    NEWLINE -> 0
+    label -> 4
+    macro -> 5
+    op_code -> 5
+    pseudo_op -> 5
+    region -> 5
+    variable -> 5
+  State 1 
+    NEWLINE -> 0
+  State 2 (final)
+  State 3 
+    COMMENT -> 1
+    ENDMARKER -> 2
+    NEWLINE -> 0
+    label -> 4
+    macro -> 5
+    op_code -> 5
+    pseudo_op -> 5
+    region -> 5
+    variable -> 5
+  State 4 
+    COMMENT -> 1
+    NEWLINE -> 0
+    macro -> 5
+    op_code -> 5
+    pseudo_op -> 5
+    region -> 5
+    variable -> 5
+  State 5 
+    COMMENT -> 1
+    NEWLINE -> 0
+  State 6 
+    COMMENT -> 1
+    NEWLINE -> 0
+  State 7 
+    COMMENT -> 1
+    NEWLINE -> 0
+  State 8 
+    COMMENT -> 1
+    NEWLINE -> 0
+  State 9 
+    COMMENT -> 1
+    NEWLINE -> 0
+Processing rule label
+Dump of NFA for label
+  State 0 
+    NAME -> 1
+  State 1 
+    -> 2
+  State 2 
+    ':' -> 3
+    -> 3
+  State 3 (final)
+Dump of DFA for label
+  State 0 
+    NAME -> 1
+  State 1 (final)
+    ':' -> 2
+  State 2 (final)
+Processing rule variable
+Dump of NFA for variable
+  State 0 
+    -> 1
+    -> 2
+  State 1 
+    '=' -> 3
+  State 2 
+    EQU -> 4
+  State 3 
+    -> 5
+  State 4 
+    -> 5
+  State 5 
+    -> 6
+  State 6 
+    exp -> 7
+  State 7 (final)
+Dump of DFA for variable
+  State 0 
+    '=' -> 1
+    EQU -> 1
+  State 1 
+    exp -> 3
+  State 2 
+    exp -> 3
+  State 3 (final)
+Processing rule region
+Dump of NFA for region
+  State 0 
+    SEGMENT -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+  State 3 
+    PARA -> 7
+  State 4 
+    PAGE -> 8
+  State 5 
+    exp -> 9
+  State 6 (final)
+  State 7 
+    -> 6
+  State 8 
+    -> 6
+  State 9 
+    -> 6
+Dump of DFA for region
+  State 0 
+    SEGMENT -> 1
+  State 1 (final)
+    PAGE -> 2
+    PARA -> 2
+    exp -> 2
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+Processing rule macro
+Dump of NFA for macro
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+  State 1 
+    '.' -> 4
+  State 2 
+    MACRO -> 5
+  State 3 
+    ENDM -> 6
+  State 4 
+    -> 7
+  State 5 
+    -> 8
+  State 6 
+    -> 9
+  State 7 
+    NAME -> 10
+  State 8 
+    NAME -> 11
+    -> 9
+  State 9 (final)
+  State 10 
+    -> 12
+  State 11 
+    -> 8
+  State 12 
+    ARG -> 13
+  State 13 
+    -> 14
+  State 14 
+    ',' -> 15
+    -> 9
+  State 15 
+    -> 16
+  State 16 
+    ARG -> 17
+  State 17 
+    -> 14
+Dump of DFA for macro
+  State 0 
+    '.' -> 1
+    ENDM -> 2
+    MACRO -> 3
+  State 1 
+    NAME -> 4
+  State 2 (final)
+  State 3 (final)
+    NAME -> 3
+  State 4 
+    ARG -> 6
+  State 5 (final)
+    NAME -> 3
+  State 6 (final)
+    ',' -> 7
+  State 7 
+    ARG -> 6
+  State 8 (final)
+    ',' -> 7
+Processing rule op_code
+Dump of NFA for op_code
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+    -> 7
+    -> 8
+    -> 9
+    -> 10
+    -> 11
+    -> 12
+    -> 13
+    -> 14
+    -> 15
+    -> 16
+  State 1 
+    group1 -> 17
+  State 2 
+    group2 -> 18
+  State 3 
+    group3 -> 19
+  State 4 
+    group4 -> 20
+  State 5 
+    group5 -> 21
+  State 6 
+    group6 -> 22
+  State 7 
+    group7 -> 23
+  State 8 
+    group8 -> 24
+  State 9 
+    group9 -> 25
+  State 10 
+    group10 -> 26
+  State 11 
+    group11 -> 27
+  State 12 
+    group12 -> 28
+  State 13 
+    group13 -> 29
+  State 14 
+    group14 -> 30
+  State 15 
+    group15 -> 31
+  State 16 
+    group16 -> 32
+  State 17 
+    -> 33
+  State 18 
+    -> 33
+  State 19 
+    -> 33
+  State 20 
+    -> 33
+  State 21 
+    -> 33
+  State 22 
+    -> 33
+  State 23 
+    -> 33
+  State 24 
+    -> 33
+  State 25 
+    -> 33
+  State 26 
+    -> 33
+  State 27 
+    -> 33
+  State 28 
+    -> 33
+  State 29 
+    -> 33
+  State 30 
+    -> 33
+  State 31 
+    -> 33
+  State 32 
+    -> 33
+  State 33 (final)
+Dump of DFA for op_code
+  State 0 
+    group1 -> 1
+    group10 -> 1
+    group11 -> 1
+    group12 -> 1
+    group13 -> 1
+    group14 -> 1
+    group15 -> 1
+    group16 -> 1
+    group2 -> 1
+    group3 -> 1
+    group4 -> 1
+    group5 -> 1
+    group6 -> 1
+    group7 -> 1
+    group8 -> 1
+    group9 -> 1
+  State 1 (final)
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+  State 5 (final)
+  State 6 (final)
+  State 7 (final)
+  State 8 (final)
+  State 9 (final)
+  State 10 (final)
+  State 11 (final)
+  State 12 (final)
+  State 13 (final)
+  State 14 (final)
+  State 15 (final)
+  State 16 (final)
+Processing rule group1
+Dump of NFA for group1
+  State 0 
+    GROUP1_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+  State 3 
+    -> 7
+    -> 8
+    -> 9
+  State 4 
+    -> 10
+    -> 11
+    -> 12
+    -> 13
+  State 5 
+    ind_exp -> 14
+  State 6 
+    long_ind_exp -> 15
+  State 7 
+    WIDE -> 16
+  State 8 
+    SHORT -> 17
+  State 9 
+    -> 18
+  State 10 
+    LONG -> 19
+  State 11 
+    DP -> 20
+  State 12 
+    ZP -> 21
+  State 13 
+    -> 22
+  State 14 
+    -> 23
+  State 15 
+    -> 23
+  State 16 
+    -> 9
+  State 17 
+    -> 9
+  State 18 
+    imm_exp -> 24
+  State 19 
+    -> 13
+  State 20 
+    -> 13
+  State 21 
+    -> 13
+  State 22 
+    ni_exp -> 25
+  State 23 (final)
+  State 24 
+    -> 23
+  State 25 
+    -> 26
+  State 26 
+    xys_index -> 27
+    -> 27
+  State 27 
+    -> 23
+Dump of DFA for group1
+  State 0 
+    GROUP1_INST -> 1
+  State 1 
+    DP -> 2
+    LONG -> 2
+    SHORT -> 4
+    WIDE -> 4
+    ZP -> 2
+    imm_exp -> 7
+    ind_exp -> 7
+    long_ind_exp -> 7
+    ni_exp -> 10
+  State 2 
+    ni_exp -> 10
+  State 3 
+    ni_exp -> 10
+  State 4 
+    imm_exp -> 7
+  State 5 
+    imm_exp -> 7
+  State 6 
+    ni_exp -> 10
+  State 7 (final)
+  State 8 (final)
+  State 9 (final)
+  State 10 (final)
+    xys_index -> 7
+  State 11 (final)
+Processing rule group2
+Dump of NFA for group2
+  State 0 
+    GROUP2_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+    -> 5
+  State 3 
+    AREG -> 6
+  State 4 
+    exp -> 7
+  State 5 (final)
+  State 6 
+    -> 5
+  State 7 
+    -> 8
+  State 8 
+    x_index -> 9
+    -> 9
+  State 9 
+    -> 5
+Dump of DFA for group2
+  State 0 
+    GROUP2_INST -> 1
+  State 1 (final)
+    AREG -> 2
+    exp -> 3
+  State 2 (final)
+  State 3 (final)
+    x_index -> 2
+  State 4 (final)
+Processing rule group3
+Dump of NFA for group3
+  State 0 
+    GROUP3_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 (final)
+Dump of DFA for group3
+  State 0 
+    GROUP3_INST -> 1
+  State 1 
+    exp -> 2
+  State 2 (final)
+Processing rule group4
+Dump of NFA for group4
+  State 0 
+    GROUP4_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    -> 5
+    -> 6
+    -> 7
+  State 4 
+    exp -> 8
+  State 5 
+    WIDE -> 9
+  State 6 
+    SHORT -> 10
+  State 7 
+    -> 11
+  State 8 
+    -> 12
+  State 9 
+    -> 7
+  State 10 
+    -> 7
+  State 11 
+    imm_exp -> 13
+  State 12 
+    x_index -> 14
+    -> 14
+  State 13 
+    -> 15
+  State 14 
+    -> 15
+  State 15 (final)
+Dump of DFA for group4
+  State 0 
+    GROUP4_INST -> 1
+  State 1 
+    SHORT -> 2
+    WIDE -> 2
+    exp -> 4
+    imm_exp -> 5
+  State 2 
+    imm_exp -> 5
+  State 3 
+    imm_exp -> 5
+  State 4 (final)
+    x_index -> 5
+  State 5 (final)
+  State 6 (final)
+Processing rule group5
+Dump of NFA for group5
+  State 0 
+    GROUP5_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    imm_exp -> 5
+  State 4 
+    exp -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 (final)
+Dump of DFA for group5
+  State 0 
+    GROUP5_INST -> 1
+  State 1 
+    exp -> 2
+    imm_exp -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule group6
+Dump of NFA for group6
+  State 0 
+    GROUP6_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+    -> 5
+  State 3 
+    WIDE -> 6
+  State 4 
+    SHORT -> 7
+  State 5 
+    -> 8
+  State 6 
+    -> 5
+  State 7 
+    -> 5
+  State 8 
+    imm_exp -> 9
+  State 9 (final)
+Dump of DFA for group6
+  State 0 
+    GROUP6_INST -> 1
+  State 1 
+    SHORT -> 2
+    WIDE -> 2
+    imm_exp -> 4
+  State 2 
+    imm_exp -> 4
+  State 3 
+    imm_exp -> 4
+  State 4 (final)
+Processing rule group7
+Dump of NFA for group7
+  State 0 
+    GROUP7_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    -> 4
+  State 4 
+    ',' -> 5
+  State 5 
+    -> 6
+  State 6 
+    exp -> 7
+  State 7 (final)
+Dump of DFA for group7
+  State 0 
+    GROUP7_INST -> 1
+  State 1 
+    exp -> 2
+  State 2 
+    ',' -> 3
+  State 3 
+    exp -> 4
+  State 4 (final)
+Processing rule group8
+Dump of NFA for group8
+  State 0 
+    GROUP8_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+    -> 5
+  State 3 
+    ni_exp -> 6
+  State 4 
+    jmp_ind_exp -> 7
+  State 5 
+    jmp_long_ind_exp -> 8
+  State 6 
+    -> 9
+  State 7 
+    -> 9
+  State 8 
+    -> 9
+  State 9 (final)
+Dump of DFA for group8
+  State 0 
+    GROUP8_INST -> 1
+  State 1 
+    jmp_ind_exp -> 2
+    jmp_long_ind_exp -> 2
+    ni_exp -> 2
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+Processing rule group9
+Dump of NFA for group9
+  State 0 
+    GROUP9_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    exp -> 5
+  State 4 
+    jmp_long_ind_exp -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 (final)
+Dump of DFA for group9
+  State 0 
+    GROUP9_INST -> 1
+  State 1 
+    exp -> 2
+    jmp_long_ind_exp -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule group10
+Dump of NFA for group10
+  State 0 
+    GROUP10_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    ni_exp -> 5
+  State 4 
+    jmp_ind_exp -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 (final)
+Dump of DFA for group10
+  State 0 
+    GROUP10_INST -> 1
+  State 1 
+    jmp_ind_exp -> 2
+    ni_exp -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule group11
+Dump of NFA for group11
+  State 0 
+    GROUP11_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    -> 5
+    -> 6
+    -> 7
+  State 4 
+    exp -> 8
+  State 5 
+    WIDE -> 9
+  State 6 
+    SHORT -> 10
+  State 7 
+    -> 11
+  State 8 
+    -> 12
+  State 9 
+    -> 7
+  State 10 
+    -> 7
+  State 11 
+    imm_exp -> 13
+  State 12 
+    y_index -> 14
+    -> 14
+  State 13 
+    -> 15
+  State 14 
+    -> 15
+  State 15 (final)
+Dump of DFA for group11
+  State 0 
+    GROUP11_INST -> 1
+  State 1 
+    SHORT -> 2
+    WIDE -> 2
+    exp -> 4
+    imm_exp -> 5
+  State 2 
+    imm_exp -> 5
+  State 3 
+    imm_exp -> 5
+  State 4 (final)
+    y_index -> 5
+  State 5 (final)
+  State 6 (final)
+Processing rule group12
+Dump of NFA for group12
+  State 0 
+    GROUP12_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    -> 4
+  State 4 
+    y_index -> 5
+    -> 5
+  State 5 (final)
+Dump of DFA for group12
+  State 0 
+    GROUP12_INST -> 1
+  State 1 
+    exp -> 2
+  State 2 (final)
+    y_index -> 3
+  State 3 (final)
+Processing rule group13
+Dump of NFA for group13
+  State 0 
+    GROUP13_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    -> 4
+  State 4 
+    x_index -> 5
+    -> 5
+  State 5 (final)
+Dump of DFA for group13
+  State 0 
+    GROUP13_INST -> 1
+  State 1 
+    exp -> 2
+  State 2 (final)
+    x_index -> 3
+  State 3 (final)
+Processing rule group14
+Dump of NFA for group14
+  State 0 
+    GROUP14_INST -> 1
+  State 1 (final)
+Dump of DFA for group14
+  State 0 
+    GROUP14_INST -> 1
+  State 1 (final)
+Processing rule group15
+Dump of NFA for group15
+  State 0 
+    GROUP15_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    '(' -> 3
+  State 3 
+    -> 4
+  State 4 
+    exp -> 5
+  State 5 
+    -> 6
+  State 6 
+    ')' -> 7
+  State 7 (final)
+Dump of DFA for group15
+  State 0 
+    GROUP15_INST -> 1
+  State 1 
+    '(' -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    ')' -> 4
+  State 4 (final)
+Processing rule group16
+Dump of NFA for group16
+  State 0 
+    GROUP16_INST -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+  State 3 
+    WIDE -> 7
+  State 4 
+    SHORT -> 8
+  State 5 
+    -> 9
+  State 6 (final)
+  State 7 
+    -> 5
+  State 8 
+    -> 5
+  State 9 
+    imm_exp -> 6
+Dump of DFA for group16
+  State 0 
+    GROUP16_INST -> 1
+  State 1 (final)
+    SHORT -> 2
+    WIDE -> 2
+    imm_exp -> 4
+  State 2 
+    imm_exp -> 4
+  State 3 
+    imm_exp -> 4
+  State 4 (final)
+Processing rule imm_exp
+Dump of NFA for imm_exp
+  State 0 
+    '#' -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 (final)
+Dump of DFA for imm_exp
+  State 0 
+    '#' -> 1
+  State 1 
+    exp -> 2
+  State 2 (final)
+Processing rule long_ind_exp
+Dump of NFA for long_ind_exp
+  State 0 
+    '[' -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    -> 4
+  State 4 
+    ']' -> 5
+  State 5 
+    -> 6
+  State 6 
+    y_index -> 7
+    -> 7
+  State 7 (final)
+Dump of DFA for long_ind_exp
+  State 0 
+    '[' -> 1
+  State 1 
+    exp -> 2
+  State 2 
+    ']' -> 3
+  State 3 (final)
+    y_index -> 4
+  State 4 (final)
+Processing rule jmp_long_ind_exp
+Dump of NFA for jmp_long_ind_exp
+  State 0 
+    '[' -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    -> 4
+  State 4 
+    ']' -> 5
+  State 5 (final)
+Dump of DFA for jmp_long_ind_exp
+  State 0 
+    '[' -> 1
+  State 1 
+    exp -> 2
+  State 2 
+    ']' -> 3
+  State 3 (final)
+Processing rule ind_exp
+Dump of NFA for ind_exp
+  State 0 
+    '(' -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    -> 4
+  State 4 
+    -> 5
+    -> 6
+    -> 7
+  State 5 
+    s_index -> 8
+  State 6 
+    x_index -> 9
+  State 7 
+    ')' -> 10
+  State 8 
+    -> 11
+  State 9 
+    -> 12
+  State 10 
+    -> 13
+  State 11 
+    ')' -> 14
+  State 12 
+    ')' -> 15
+  State 13 
+    -> 16
+    -> 17
+    -> 18
+  State 14 
+    -> 19
+  State 15 
+    -> 20
+  State 16 
+    is_exp -> 21
+  State 17 
+    y_index -> 22
+  State 18 
+    -> 20
+  State 19 
+    y_index -> 23
+  State 20 (final)
+  State 21 
+    -> 18
+  State 22 
+    -> 18
+  State 23 
+    -> 20
+Dump of DFA for ind_exp
+  State 0 
+    '(' -> 1
+  State 1 
+    exp -> 2
+  State 2 
+    ')' -> 3
+    s_index -> 4
+    x_index -> 5
+  State 3 (final)
+    is_exp -> 6
+    y_index -> 6
+  State 4 
+    ')' -> 8
+  State 5 
+    ')' -> 6
+  State 6 (final)
+  State 7 (final)
+  State 8 
+    y_index -> 6
+  State 9 (final)
+  State 10 (final)
+Processing rule jmp_ind_exp
+Dump of NFA for jmp_ind_exp
+  State 0 
+    '(' -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 
+    -> 4
+  State 4 
+    -> 5
+    -> 6
+  State 5 
+    x_index -> 7
+  State 6 
+    ')' -> 8
+  State 7 
+    -> 9
+  State 8 
+    -> 10
+  State 9 
+    ')' -> 11
+  State 10 
+    jmp_is_exp -> 12
+    -> 12
+  State 11 
+    -> 13
+  State 12 
+    -> 13
+  State 13 (final)
+Dump of DFA for jmp_ind_exp
+  State 0 
+    '(' -> 1
+  State 1 
+    exp -> 2
+  State 2 
+    ')' -> 3
+    x_index -> 4
+  State 3 (final)
+    jmp_is_exp -> 5
+  State 4 
+    ')' -> 5
+  State 5 (final)
+  State 6 (final)
+Processing rule is_exp
+Dump of NFA for is_exp
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+  State 1 
+    '|' -> 7
+  State 2 
+    '^' -> 8
+  State 3 
+    '&' -> 9
+  State 4 
+    -> 10
+    -> 11
+  State 5 
+    -> 12
+    -> 13
+  State 6 
+    -> 14
+    -> 15
+    -> 16
+  State 7 
+    -> 17
+  State 8 
+    -> 18
+  State 9 
+    -> 19
+  State 10 
+    '<<' -> 20
+  State 11 
+    '>>' -> 21
+  State 12 
+    '+' -> 22
+  State 13 
+    '-' -> 23
+  State 14 
+    '*' -> 24
+  State 15 
+    '/' -> 25
+  State 16 
+    '%' -> 26
+  State 17 
+    xor_expr -> 27
+  State 18 
+    and_expr -> 28
+  State 19 
+    shift_expr -> 29
+  State 20 
+    -> 30
+  State 21 
+    -> 30
+  State 22 
+    -> 31
+  State 23 
+    -> 31
+  State 24 
+    -> 32
+  State 25 
+    -> 32
+  State 26 
+    -> 32
+  State 27 
+    -> 33
+  State 28 
+    -> 33
+  State 29 
+    -> 33
+  State 30 
+    -> 34
+  State 31 
+    -> 35
+  State 32 
+    -> 36
+  State 33 
+    -> 37
+  State 34 
+    arith_expr -> 38
+  State 35 
+    term -> 39
+  State 36 
+    factor -> 40
+  State 37 
+    xys_index -> 41
+    -> 41
+  State 38 
+    -> 33
+  State 39 
+    -> 33
+  State 40 
+    -> 33
+  State 41 (final)
+Dump of DFA for is_exp
+  State 0 
+    '%' -> 1
+    '&' -> 2
+    '*' -> 1
+    '+' -> 4
+    '-' -> 4
+    '/' -> 1
+    '<<' -> 7
+    '>>' -> 7
+    '^' -> 9
+    '|' -> 10
+  State 1 
+    factor -> 11
+  State 2 
+    shift_expr -> 11
+  State 3 
+    factor -> 11
+  State 4 
+    term -> 11
+  State 5 
+    term -> 11
+  State 6 
+    factor -> 11
+  State 7 
+    arith_expr -> 11
+  State 8 
+    arith_expr -> 11
+  State 9 
+    and_expr -> 11
+  State 10 
+    xor_expr -> 11
+  State 11 (final)
+    xys_index -> 17
+  State 12 (final)
+    xys_index -> 17
+  State 13 (final)
+    xys_index -> 17
+  State 14 (final)
+    xys_index -> 17
+  State 15 (final)
+    xys_index -> 17
+  State 16 (final)
+    xys_index -> 17
+  State 17 (final)
+Processing rule jmp_is_exp
+Dump of NFA for jmp_is_exp
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+  State 1 
+    '|' -> 7
+  State 2 
+    '^' -> 8
+  State 3 
+    '&' -> 9
+  State 4 
+    -> 10
+    -> 11
+  State 5 
+    -> 12
+    -> 13
+  State 6 
+    -> 14
+    -> 15
+    -> 16
+  State 7 
+    -> 17
+  State 8 
+    -> 18
+  State 9 
+    -> 19
+  State 10 
+    '<<' -> 20
+  State 11 
+    '>>' -> 21
+  State 12 
+    '+' -> 22
+  State 13 
+    '-' -> 23
+  State 14 
+    '*' -> 24
+  State 15 
+    '/' -> 25
+  State 16 
+    '%' -> 26
+  State 17 
+    xor_expr -> 27
+  State 18 
+    and_expr -> 28
+  State 19 
+    shift_expr -> 29
+  State 20 
+    -> 30
+  State 21 
+    -> 30
+  State 22 
+    -> 31
+  State 23 
+    -> 31
+  State 24 
+    -> 32
+  State 25 
+    -> 32
+  State 26 
+    -> 32
+  State 27 
+    -> 33
+  State 28 
+    -> 33
+  State 29 
+    -> 33
+  State 30 
+    -> 34
+  State 31 
+    -> 35
+  State 32 
+    -> 36
+  State 33 (final)
+  State 34 
+    arith_expr -> 37
+  State 35 
+    term -> 38
+  State 36 
+    factor -> 39
+  State 37 
+    -> 33
+  State 38 
+    -> 33
+  State 39 
+    -> 33
+Dump of DFA for jmp_is_exp
+  State 0 
+    '%' -> 1
+    '&' -> 2
+    '*' -> 1
+    '+' -> 4
+    '-' -> 4
+    '/' -> 1
+    '<<' -> 7
+    '>>' -> 7
+    '^' -> 9
+    '|' -> 10
+  State 1 
+    factor -> 11
+  State 2 
+    shift_expr -> 11
+  State 3 
+    factor -> 11
+  State 4 
+    term -> 11
+  State 5 
+    term -> 11
+  State 6 
+    factor -> 11
+  State 7 
+    arith_expr -> 11
+  State 8 
+    arith_expr -> 11
+  State 9 
+    and_expr -> 11
+  State 10 
+    xor_expr -> 11
+  State 11 (final)
+  State 12 (final)
+  State 13 (final)
+  State 14 (final)
+  State 15 (final)
+  State 16 (final)
+Processing rule x_index
+Dump of NFA for x_index
+  State 0 
+    ',' -> 1
+  State 1 
+    -> 2
+  State 2 
+    XREG -> 3
+  State 3 (final)
+Dump of DFA for x_index
+  State 0 
+    ',' -> 1
+  State 1 
+    XREG -> 2
+  State 2 (final)
+Processing rule y_index
+Dump of NFA for y_index
+  State 0 
+    ',' -> 1
+  State 1 
+    -> 2
+  State 2 
+    YREG -> 3
+  State 3 (final)
+Dump of DFA for y_index
+  State 0 
+    ',' -> 1
+  State 1 
+    YREG -> 2
+  State 2 (final)
+Processing rule s_index
+Dump of NFA for s_index
+  State 0 
+    ',' -> 1
+  State 1 
+    -> 2
+  State 2 
+    SREG -> 3
+  State 3 (final)
+Dump of DFA for s_index
+  State 0 
+    ',' -> 1
+  State 1 
+    SREG -> 2
+  State 2 (final)
+Processing rule xy_index
+Dump of NFA for xy_index
+  State 0 
+    ',' -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    XREG -> 5
+  State 4 
+    YREG -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 (final)
+Dump of DFA for xy_index
+  State 0 
+    ',' -> 1
+  State 1 
+    XREG -> 2
+    YREG -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule xs_index
+Dump of NFA for xs_index
+  State 0 
+    ',' -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    XREG -> 5
+  State 4 
+    SREG -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 (final)
+Dump of DFA for xs_index
+  State 0 
+    ',' -> 1
+  State 1 
+    SREG -> 2
+    XREG -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule ys_index
+Dump of NFA for ys_index
+  State 0 
+    ',' -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    YREG -> 5
+  State 4 
+    SREG -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 (final)
+Dump of DFA for ys_index
+  State 0 
+    ',' -> 1
+  State 1 
+    SREG -> 2
+    YREG -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule xys_index
+Dump of NFA for xys_index
+  State 0 
+    ',' -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+    -> 5
+  State 3 
+    XREG -> 6
+  State 4 
+    YREG -> 7
+  State 5 
+    SREG -> 8
+  State 6 
+    -> 9
+  State 7 
+    -> 9
+  State 8 
+    -> 9
+  State 9 (final)
+Dump of DFA for xys_index
+  State 0 
+    ',' -> 1
+  State 1 
+    SREG -> 2
+    XREG -> 2
+    YREG -> 2
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+Processing rule symbol
+Dump of NFA for symbol
+  State 0 
+    NAME -> 1
+  State 1 
+    -> 2
+  State 2 
+    ':' -> 3
+    -> 3
+  State 3 (final)
+Dump of DFA for symbol
+  State 0 
+    NAME -> 1
+  State 1 (final)
+    ':' -> 2
+  State 2 (final)
+Processing rule exp
+Dump of NFA for exp
+  State 0 
+    and_cond -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '||' -> 3
+  State 3 
+    -> 4
+  State 4 
+    and_cond -> 5
+  State 5 
+    -> 2
+Dump of DFA for exp
+  State 0 
+    and_cond -> 1
+  State 1 (final)
+    '||' -> 2
+  State 2 
+    and_cond -> 1
+  State 3 (final)
+    '||' -> 2
+Processing rule and_cond
+Dump of NFA for and_cond
+  State 0 
+    not_cond -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '&&' -> 3
+  State 3 
+    -> 4
+  State 4 
+    not_cond -> 5
+  State 5 
+    -> 2
+Dump of DFA for and_cond
+  State 0 
+    not_cond -> 1
+  State 1 (final)
+    '&&' -> 2
+  State 2 
+    not_cond -> 1
+  State 3 (final)
+    '&&' -> 2
+Processing rule not_cond
+Dump of NFA for not_cond
+  State 0 
+    -> 1
+    -> 2
+  State 1 
+    '!' -> 3
+  State 2 
+    comparison -> 4
+  State 3 
+    -> 5
+  State 4 
+    -> 6
+  State 5 
+    not_cond -> 7
+  State 6 (final)
+  State 7 
+    -> 6
+Dump of DFA for not_cond
+  State 0 
+    '!' -> 1
+    comparison -> 2
+  State 1 
+    not_cond -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule comparison
+Dump of NFA for comparison
+  State 0 
+    or_exp -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    comp_op -> 3
+  State 3 
+    -> 4
+  State 4 
+    or_exp -> 5
+  State 5 
+    -> 2
+Dump of DFA for comparison
+  State 0 
+    or_exp -> 1
+  State 1 (final)
+    comp_op -> 2
+  State 2 
+    or_exp -> 1
+  State 3 (final)
+    comp_op -> 2
+Processing rule comp_op
+Dump of NFA for comp_op
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+  State 1 
+    '<' -> 7
+  State 2 
+    '>' -> 8
+  State 3 
+    '==' -> 9
+  State 4 
+    '!=' -> 10
+  State 5 
+    '>=' -> 11
+  State 6 
+    '<=' -> 12
+  State 7 
+    -> 13
+  State 8 
+    -> 13
+  State 9 
+    -> 13
+  State 10 
+    -> 13
+  State 11 
+    -> 13
+  State 12 
+    -> 13
+  State 13 (final)
+Dump of DFA for comp_op
+  State 0 
+    '!=' -> 1
+    '<' -> 1
+    '<=' -> 1
+    '==' -> 1
+    '>' -> 1
+    '>=' -> 1
+  State 1 (final)
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+  State 5 (final)
+  State 6 (final)
+Processing rule or_exp
+Dump of NFA for or_exp
+  State 0 
+    xor_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '|' -> 3
+  State 3 
+    -> 4
+  State 4 
+    xor_expr -> 5
+  State 5 
+    -> 2
+Dump of DFA for or_exp
+  State 0 
+    xor_expr -> 1
+  State 1 (final)
+    '|' -> 2
+  State 2 
+    xor_expr -> 1
+  State 3 (final)
+    '|' -> 2
+Processing rule xor_expr
+Dump of NFA for xor_expr
+  State 0 
+    and_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '^' -> 3
+  State 3 
+    -> 4
+  State 4 
+    and_expr -> 5
+  State 5 
+    -> 2
+Dump of DFA for xor_expr
+  State 0 
+    and_expr -> 1
+  State 1 (final)
+    '^' -> 2
+  State 2 
+    and_expr -> 1
+  State 3 (final)
+    '^' -> 2
+Processing rule and_expr
+Dump of NFA for and_expr
+  State 0 
+    shift_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '&' -> 3
+  State 3 
+    -> 4
+  State 4 
+    shift_expr -> 5
+  State 5 
+    -> 2
+Dump of DFA for and_expr
+  State 0 
+    shift_expr -> 1
+  State 1 (final)
+    '&' -> 2
+  State 2 
+    shift_expr -> 1
+  State 3 (final)
+    '&' -> 2
+Processing rule shift_expr
+Dump of NFA for shift_expr
+  State 0 
+    arith_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    -> 3
+    -> 4
+  State 3 
+    '<<' -> 5
+  State 4 
+    '>>' -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 
+    -> 8
+  State 8 
+    arith_expr -> 9
+  State 9 
+    -> 2
+Dump of DFA for shift_expr
+  State 0 
+    arith_expr -> 1
+  State 1 (final)
+    '<<' -> 2
+    '>>' -> 2
+  State 2 
+    arith_expr -> 1
+  State 3 
+    arith_expr -> 1
+  State 4 (final)
+    '<<' -> 2
+    '>>' -> 2
+Processing rule arith_expr
+Dump of NFA for arith_expr
+  State 0 
+    term -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    -> 3
+    -> 4
+  State 3 
+    '+' -> 5
+  State 4 
+    '-' -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 
+    -> 8
+  State 8 
+    term -> 9
+  State 9 
+    -> 2
+Dump of DFA for arith_expr
+  State 0 
+    term -> 1
+  State 1 (final)
+    '+' -> 2
+    '-' -> 2
+  State 2 
+    term -> 1
+  State 3 
+    term -> 1
+  State 4 (final)
+    '+' -> 2
+    '-' -> 2
+Processing rule term
+Dump of NFA for term
+  State 0 
+    factor -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    -> 3
+    -> 4
+    -> 5
+  State 3 
+    '*' -> 6
+  State 4 
+    '/' -> 7
+  State 5 
+    '%' -> 8
+  State 6 
+    -> 9
+  State 7 
+    -> 9
+  State 8 
+    -> 9
+  State 9 
+    -> 10
+  State 10 
+    factor -> 11
+  State 11 
+    -> 2
+Dump of DFA for term
+  State 0 
+    factor -> 1
+  State 1 (final)
+    '%' -> 2
+    '*' -> 2
+    '/' -> 2
+  State 2 
+    factor -> 1
+  State 3 
+    factor -> 1
+  State 4 
+    factor -> 1
+  State 5 (final)
+    '%' -> 2
+    '*' -> 2
+    '/' -> 2
+Processing rule factor
+Dump of NFA for factor
+  State 0 
+    -> 1
+    -> 2
+  State 1 
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+    -> 7
+    -> 8
+  State 2 
+    atom -> 9
+  State 3 
+    '+' -> 10
+  State 4 
+    '-' -> 11
+  State 5 
+    '~' -> 12
+  State 6 
+    '<' -> 13
+  State 7 
+    '>' -> 14
+  State 8 
+    '>>' -> 15
+  State 9 
+    -> 16
+  State 10 
+    -> 17
+  State 11 
+    -> 17
+  State 12 
+    -> 17
+  State 13 
+    -> 17
+  State 14 
+    -> 17
+  State 15 
+    -> 17
+  State 16 (final)
+  State 17 
+    -> 18
+  State 18 
+    factor -> 19
+  State 19 
+    -> 16
+Dump of DFA for factor
+  State 0 
+    '+' -> 1
+    '-' -> 1
+    '<' -> 1
+    '>' -> 1
+    '>>' -> 1
+    '~' -> 1
+    atom -> 7
+  State 1 
+    factor -> 7
+  State 2 
+    factor -> 7
+  State 3 
+    factor -> 7
+  State 4 
+    factor -> 7
+  State 5 
+    factor -> 7
+  State 6 
+    factor -> 7
+  State 7 (final)
+  State 8 (final)
+Processing rule atom
+Dump of NFA for atom
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+    -> 4
+    -> 5
+  State 1 
+    '(' -> 6
+  State 2 
+    CHAR -> 7
+  State 3 
+    NUMBER -> 8
+  State 4 
+    symbol -> 9
+  State 5 
+    '*' -> 10
+  State 6 
+    -> 11
+  State 7 
+    -> 12
+  State 8 
+    -> 12
+  State 9 
+    -> 12
+  State 10 
+    -> 12
+  State 11 
+    exp -> 13
+  State 12 (final)
+  State 13 
+    -> 14
+  State 14 
+    ')' -> 15
+  State 15 
+    -> 12
+Dump of DFA for atom
+  State 0 
+    '(' -> 1
+    '*' -> 2
+    CHAR -> 2
+    NUMBER -> 2
+    symbol -> 2
+  State 1 
+    exp -> 6
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+  State 5 (final)
+  State 6 
+    ')' -> 2
+  State 7 (final)
+Processing rule ni_exp
+Dump of NFA for ni_exp
+  State 0 
+    ni_and_cond -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '||' -> 3
+  State 3 
+    -> 4
+  State 4 
+    and_cond -> 5
+  State 5 
+    -> 2
+Dump of DFA for ni_exp
+  State 0 
+    ni_and_cond -> 1
+  State 1 (final)
+    '||' -> 2
+  State 2 
+    and_cond -> 1
+  State 3 (final)
+    '||' -> 2
+Processing rule ni_and_cond
+Dump of NFA for ni_and_cond
+  State 0 
+    ni_not_cond -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '&&' -> 3
+  State 3 
+    -> 4
+  State 4 
+    not_cond -> 5
+  State 5 
+    -> 2
+Dump of DFA for ni_and_cond
+  State 0 
+    ni_not_cond -> 1
+  State 1 (final)
+    '&&' -> 2
+  State 2 
+    not_cond -> 1
+  State 3 (final)
+    '&&' -> 2
+Processing rule ni_not_cond
+Dump of NFA for ni_not_cond
+  State 0 
+    -> 1
+    -> 2
+  State 1 
+    '!' -> 3
+  State 2 
+    ni_comparison -> 4
+  State 3 
+    -> 5
+  State 4 
+    -> 6
+  State 5 
+    not_cond -> 7
+  State 6 (final)
+  State 7 
+    -> 6
+Dump of DFA for ni_not_cond
+  State 0 
+    '!' -> 1
+    ni_comparison -> 2
+  State 1 
+    not_cond -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule ni_comparison
+Dump of NFA for ni_comparison
+  State 0 
+    ni_or_exp -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    comp_op -> 3
+  State 3 
+    -> 4
+  State 4 
+    or_exp -> 5
+  State 5 
+    -> 2
+Dump of DFA for ni_comparison
+  State 0 
+    ni_or_exp -> 1
+  State 1 (final)
+    comp_op -> 2
+  State 2 
+    or_exp -> 1
+  State 3 (final)
+    comp_op -> 2
+Processing rule ni_or_exp
+Dump of NFA for ni_or_exp
+  State 0 
+    ni_xor_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '|' -> 3
+  State 3 
+    -> 4
+  State 4 
+    xor_expr -> 5
+  State 5 
+    -> 2
+Dump of DFA for ni_or_exp
+  State 0 
+    ni_xor_expr -> 1
+  State 1 (final)
+    '|' -> 2
+  State 2 
+    xor_expr -> 1
+  State 3 (final)
+    '|' -> 2
+Processing rule ni_xor_expr
+Dump of NFA for ni_xor_expr
+  State 0 
+    ni_and_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '^' -> 3
+  State 3 
+    -> 4
+  State 4 
+    and_expr -> 5
+  State 5 
+    -> 2
+Dump of DFA for ni_xor_expr
+  State 0 
+    ni_and_expr -> 1
+  State 1 (final)
+    '^' -> 2
+  State 2 
+    and_expr -> 1
+  State 3 (final)
+    '^' -> 2
+Processing rule ni_and_expr
+Dump of NFA for ni_and_expr
+  State 0 
+    ni_shift_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    '&' -> 3
+  State 3 
+    -> 4
+  State 4 
+    shift_expr -> 5
+  State 5 
+    -> 2
+Dump of DFA for ni_and_expr
+  State 0 
+    ni_shift_expr -> 1
+  State 1 (final)
+    '&' -> 2
+  State 2 
+    shift_expr -> 1
+  State 3 (final)
+    '&' -> 2
+Processing rule ni_shift_expr
+Dump of NFA for ni_shift_expr
+  State 0 
+    ni_arith_expr -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    -> 3
+    -> 4
+  State 3 
+    '<<' -> 5
+  State 4 
+    '>>' -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 
+    -> 8
+  State 8 
+    arith_expr -> 9
+  State 9 
+    -> 2
+Dump of DFA for ni_shift_expr
+  State 0 
+    ni_arith_expr -> 1
+  State 1 (final)
+    '<<' -> 2
+    '>>' -> 2
+  State 2 
+    arith_expr -> 1
+  State 3 
+    arith_expr -> 1
+  State 4 (final)
+    '<<' -> 2
+    '>>' -> 2
+Processing rule ni_arith_expr
+Dump of NFA for ni_arith_expr
+  State 0 
+    ni_term -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    -> 3
+    -> 4
+  State 3 
+    '+' -> 5
+  State 4 
+    '-' -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 
+    -> 8
+  State 8 
+    term -> 9
+  State 9 
+    -> 2
+Dump of DFA for ni_arith_expr
+  State 0 
+    ni_term -> 1
+  State 1 (final)
+    '+' -> 2
+    '-' -> 2
+  State 2 
+    term -> 1
+  State 3 
+    term -> 1
+  State 4 (final)
+    '+' -> 2
+    '-' -> 2
+Processing rule ni_term
+Dump of NFA for ni_term
+  State 0 
+    ni_factor -> 1
+  State 1 
+    -> 2
+  State 2 (final)
+    -> 3
+    -> 4
+    -> 5
+  State 3 
+    '*' -> 6
+  State 4 
+    '/' -> 7
+  State 5 
+    '%' -> 8
+  State 6 
+    -> 9
+  State 7 
+    -> 9
+  State 8 
+    -> 9
+  State 9 
+    -> 10
+  State 10 
+    factor -> 11
+  State 11 
+    -> 2
+Dump of DFA for ni_term
+  State 0 
+    ni_factor -> 1
+  State 1 (final)
+    '%' -> 2
+    '*' -> 2
+    '/' -> 2
+  State 2 
+    factor -> 1
+  State 3 
+    factor -> 1
+  State 4 
+    factor -> 1
+  State 5 (final)
+    '%' -> 2
+    '*' -> 2
+    '/' -> 2
+Processing rule ni_factor
+Dump of NFA for ni_factor
+  State 0 
+    -> 1
+    -> 2
+  State 1 
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+    -> 7
+    -> 8
+  State 2 
+    ni_atom -> 9
+  State 3 
+    '+' -> 10
+  State 4 
+    '-' -> 11
+  State 5 
+    '~' -> 12
+  State 6 
+    '<' -> 13
+  State 7 
+    '>' -> 14
+  State 8 
+    '>>' -> 15
+  State 9 
+    -> 16
+  State 10 
+    -> 17
+  State 11 
+    -> 17
+  State 12 
+    -> 17
+  State 13 
+    -> 17
+  State 14 
+    -> 17
+  State 15 
+    -> 17
+  State 16 (final)
+  State 17 
+    -> 18
+  State 18 
+    factor -> 19
+  State 19 
+    -> 16
+Dump of DFA for ni_factor
+  State 0 
+    '+' -> 1
+    '-' -> 1
+    '<' -> 1
+    '>' -> 1
+    '>>' -> 1
+    '~' -> 1
+    ni_atom -> 7
+  State 1 
+    factor -> 7
+  State 2 
+    factor -> 7
+  State 3 
+    factor -> 7
+  State 4 
+    factor -> 7
+  State 5 
+    factor -> 7
+  State 6 
+    factor -> 7
+  State 7 (final)
+  State 8 (final)
+Processing rule ni_atom
+Dump of NFA for ni_atom
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+    -> 4
+  State 1 
+    CHAR -> 5
+  State 2 
+    NUMBER -> 6
+  State 3 
+    symbol -> 7
+  State 4 
+    '*' -> 8
+  State 5 
+    -> 9
+  State 6 
+    -> 9
+  State 7 
+    -> 9
+  State 8 
+    -> 9
+  State 9 (final)
+Dump of DFA for ni_atom
+  State 0 
+    '*' -> 1
+    CHAR -> 1
+    NUMBER -> 1
+    symbol -> 1
+  State 1 (final)
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+Processing rule pseudo_op
+Dump of NFA for pseudo_op
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+    -> 4
+    -> 5
+    -> 6
+    -> 7
+    -> 8
+    -> 9
+    -> 10
+    -> 11
+    -> 12
+    -> 13
+    -> 14
+    -> 15
+    -> 16
+    -> 17
+  State 1 
+    CPU6502 -> 18
+  State 2 
+    CPU65C02 -> 19
+  State 3 
+    CPU65C816 -> 20
+  State 4 
+    WIDEA -> 21
+  State 5 
+    SHORTA -> 22
+  State 6 
+    WIDEXY -> 23
+  State 7 
+    SHORTXY -> 24
+  State 8 
+    define_byte -> 25
+  State 9 
+    define_word -> 26
+  State 10 
+    define_storage -> 27
+  State 11 
+    align -> 28
+  State 12 
+    block -> 29
+  State 13 
+    END_BLOCK -> 30
+  State 14 
+    if_def -> 31
+  State 15 
+    iff -> 32
+  State 16 
+    ELSE -> 33
+  State 17 
+    ENDIF -> 34
+  State 18 
+    -> 35
+  State 19 
+    -> 35
+  State 20 
+    -> 35
+  State 21 
+    -> 35
+  State 22 
+    -> 35
+  State 23 
+    -> 35
+  State 24 
+    -> 35
+  State 25 
+    -> 35
+  State 26 
+    -> 35
+  State 27 
+    -> 35
+  State 28 
+    -> 35
+  State 29 
+    -> 35
+  State 30 
+    -> 35
+  State 31 
+    -> 35
+  State 32 
+    -> 35
+  State 33 
+    -> 35
+  State 34 
+    -> 35
+  State 35 (final)
+Dump of DFA for pseudo_op
+  State 0 
+    CPU6502 -> 1
+    CPU65C02 -> 1
+    CPU65C816 -> 1
+    ELSE -> 1
+    ENDIF -> 1
+    END_BLOCK -> 1
+    SHORTA -> 1
+    SHORTXY -> 1
+    WIDEA -> 1
+    WIDEXY -> 1
+    align -> 1
+    block -> 1
+    define_byte -> 1
+    define_storage -> 1
+    define_word -> 1
+    if_def -> 1
+    iff -> 1
+  State 1 (final)
+  State 2 (final)
+  State 3 (final)
+  State 4 (final)
+  State 5 (final)
+  State 6 (final)
+  State 7 (final)
+  State 8 (final)
+  State 9 (final)
+  State 10 (final)
+  State 11 (final)
+  State 12 (final)
+  State 13 (final)
+  State 14 (final)
+  State 15 (final)
+  State 16 (final)
+  State 17 (final)
+Processing rule define_byte
+Dump of NFA for define_byte
+  State 0 
+    DB -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    exp -> 5
+  State 4 
+    STRING -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 
+    -> 8
+  State 8 (final)
+    ',' -> 9
+  State 9 
+    -> 10
+  State 10 
+    -> 11
+    -> 12
+  State 11 
+    exp -> 13
+  State 12 
+    STRING -> 14
+  State 13 
+    -> 15
+  State 14 
+    -> 15
+  State 15 
+    -> 8
+Dump of DFA for define_byte
+  State 0 
+    DB -> 1
+  State 1 
+    STRING -> 2
+    exp -> 2
+  State 2 (final)
+    ',' -> 4
+  State 3 (final)
+    ',' -> 4
+  State 4 
+    STRING -> 2
+    exp -> 2
+  State 5 (final)
+    ',' -> 4
+  State 6 (final)
+    ',' -> 4
+Processing rule define_word
+Dump of NFA for define_word
+  State 0 
+    -> 1
+    -> 2
+    -> 3
+  State 1 
+    DW -> 4
+  State 2 
+    DBW -> 5
+  State 3 
+    DA -> 6
+  State 4 
+    -> 7
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 
+    -> 8
+  State 8 
+    exp -> 9
+  State 9 
+    -> 10
+  State 10 (final)
+    ',' -> 11
+  State 11 
+    -> 12
+  State 12 
+    exp -> 13
+  State 13 
+    -> 10
+Dump of DFA for define_word
+  State 0 
+    DA -> 1
+    DBW -> 1
+    DW -> 1
+  State 1 
+    exp -> 4
+  State 2 
+    exp -> 4
+  State 3 
+    exp -> 4
+  State 4 (final)
+    ',' -> 5
+  State 5 
+    exp -> 4
+  State 6 (final)
+    ',' -> 5
+Processing rule define_storage
+Dump of NFA for define_storage
+  State 0 
+    DS -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 (final)
+Dump of DFA for define_storage
+  State 0 
+    DS -> 1
+  State 1 
+    exp -> 2
+  State 2 (final)
+Processing rule align
+Dump of NFA for align
+  State 0 
+    ALIGN -> 1
+  State 1 
+    -> 2
+  State 2 
+    -> 3
+    -> 4
+  State 3 
+    PARA -> 5
+  State 4 
+    PAGE -> 6
+  State 5 
+    -> 7
+  State 6 
+    -> 7
+  State 7 (final)
+Dump of DFA for align
+  State 0 
+    ALIGN -> 1
+  State 1 
+    PAGE -> 2
+    PARA -> 2
+  State 2 (final)
+  State 3 (final)
+Processing rule block
+Dump of NFA for block
+  State 0 
+    BLOCK -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 (final)
+Dump of DFA for block
+  State 0 
+    BLOCK -> 1
+  State 1 
+    exp -> 2
+  State 2 (final)
+Processing rule if_def
+Dump of NFA for if_def
+  State 0 
+    -> 1
+    -> 2
+  State 1 
+    IFDEF -> 3
+  State 2 
+    IFNDEF -> 4
+  State 3 
+    -> 5
+  State 4 
+    -> 5
+  State 5 
+    -> 6
+  State 6 
+    NAME -> 7
+  State 7 (final)
+Dump of DFA for if_def
+  State 0 
+    IFDEF -> 1
+    IFNDEF -> 1
+  State 1 
+    NAME -> 3
+  State 2 
+    NAME -> 3
+  State 3 (final)
+Processing rule iff
+Dump of NFA for iff
+  State 0 
+    IF -> 1
+  State 1 
+    -> 2
+  State 2 
+    exp -> 3
+  State 3 (final)
+Dump of DFA for iff
+  State 0 
+    IF -> 1
+  State 1 
+    exp -> 2
+  State 2 (final)
+First set for lines
+    - GROUP16_INST
+    - DS
+    - IFDEF
+    - GROUP9_INST
+    - GROUP2_INST
+    - DW
+    - GROUP12_INST
+    - WIDEXY
+    - SEGMENT
+    - GROUP8_INST
+    - COMMENT
+    - GROUP11_INST
+    - GROUP1_INST
+    - CPU6502
+    - END_BLOCK
+    - GROUP3_INST
+    - NAME
+    - GROUP4_INST
+    - SHORTA
+    - GROUP5_INST
+    - WIDEA
+    - ELSE
+    - MACRO
+    - GROUP14_INST
+    - DBW
+    - GROUP7_INST
+    - CPU65C02
+    - DA
+    - ENDM
+    - CPU65C816
+    - DB
+    - '.'
+    - GROUP13_INST
+    - NEWLINE
+    - GROUP15_INST
+    - IF
+    - BLOCK
+    - GROUP6_INST
+    - ENDIF
+    - SHORTXY
+    - GROUP10_INST
+    - IFNDEF
+    - EQU
+    - '='
+    - ALIGN
+    - ENDMARKER
+First set for label
+    - NAME
+First set for variable
+    - '='
+    - EQU
+First set for region
+    - SEGMENT
+First set for macro
+    - '.'
+    - MACRO
+    - ENDM
+First set for op_code
+    - GROUP16_INST
+    - GROUP11_INST
+    - GROUP1_INST
+    - GROUP14_INST
+    - GROUP6_INST
+    - GROUP10_INST
+    - GROUP7_INST
+    - GROUP9_INST
+    - GROUP3_INST
+    - GROUP2_INST
+    - GROUP5_INST
+    - GROUP4_INST
+    - GROUP12_INST
+    - GROUP13_INST
+    - GROUP8_INST
+    - GROUP15_INST
+First set for group1
+    - GROUP1_INST
+First set for group2
+    - GROUP2_INST
+First set for group3
+    - GROUP3_INST
+First set for group4
+    - GROUP4_INST
+First set for group5
+    - GROUP5_INST
+First set for group6
+    - GROUP6_INST
+First set for group7
+    - GROUP7_INST
+First set for group8
+    - GROUP8_INST
+First set for group9
+    - GROUP9_INST
+First set for group10
+    - GROUP10_INST
+First set for group11
+    - GROUP11_INST
+First set for group12
+    - GROUP12_INST
+First set for group13
+    - GROUP13_INST
+First set for group14
+    - GROUP14_INST
+First set for group15
+    - GROUP15_INST
+First set for group16
+    - GROUP16_INST
+First set for imm_exp
+    - '#'
+First set for long_ind_exp
+    - '['
+First set for jmp_long_ind_exp
+    - '['
+First set for ind_exp
+    - '('
+First set for jmp_ind_exp
+    - '('
+First set for is_exp
+    - '>>'
+    - '/'
+    - '&'
+    - '%'
+    - '-'
+    - '*'
+    - '+'
+    - '|'
+    - '<<'
+    - '^'
+First set for jmp_is_exp
+    - '>>'
+    - '/'
+    - '&'
+    - '%'
+    - '-'
+    - '*'
+    - '+'
+    - '|'
+    - '<<'
+    - '^'
+First set for x_index
+    - ','
+First set for y_index
+    - ','
+First set for s_index
+    - ','
+First set for xy_index
+    - ','
+First set for xs_index
+    - ','
+First set for ys_index
+    - ','
+First set for xys_index
+    - ','
+First set for symbol
+    - NAME
+First set for exp
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+    - '!'
+First set for and_cond
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+    - '!'
+First set for not_cond
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+    - '!'
+First set for comparison
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for comp_op
+    - '!='
+    - '>'
+    - '>='
+    - '<'
+    - '=='
+    - '<='
+First set for or_exp
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for xor_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for and_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for shift_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for arith_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for term
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for factor
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - '('
+    - '<'
+    - CHAR
+    - NAME
+    - NUMBER
+First set for atom
+    - '('
+    - CHAR
+    - NAME
+    - NUMBER
+    - '*'
+First set for ni_exp
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+    - '!'
+First set for ni_and_cond
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+    - '!'
+First set for ni_not_cond
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+    - '!'
+First set for ni_comparison
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_or_exp
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_xor_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_and_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_shift_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_arith_expr
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_term
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_factor
+    - '>>'
+    - '~'
+    - '-'
+    - '*'
+    - '>'
+    - '+'
+    - CHAR
+    - '<'
+    - NAME
+    - NUMBER
+First set for ni_atom
+    - NUMBER
+    - '*'
+    - CHAR
+    - NAME
+First set for pseudo_op
+    - ELSE
+    - DS
+    - IFDEF
+    - DBW
+    - CPU65C02
+    - DA
+    - DW
+    - CPU65C816
+    - DB
+    - WIDEXY
+    - IF
+    - ALIGN
+    - BLOCK
+    - ENDIF
+    - SHORTXY
+    - CPU6502
+    - END_BLOCK
+    - IFNDEF
+    - SHORTA
+    - WIDEA
+First set for define_byte
+    - DB
+First set for define_word
+    - DA
+    - DW
+    - DBW
+First set for define_storage
+    - DS
+First set for align
+    - ALIGN
+First set for block
+    - BLOCK
+First set for if_def
+    - IFNDEF
+    - IFDEF
+First set for iff
+    - IF
+
+Grammar summary
+===============
+- 159 labels
+- 70 dfas
+- 88 tokens
+- 0 keywords
+- Start symbol: lines
