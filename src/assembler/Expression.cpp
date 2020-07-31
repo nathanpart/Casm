@@ -15,7 +15,7 @@ using namespace std;
 
 static void evaluateString(ExpressionItem &exp_item);
 
-void Expression::buildRpnList(const node &expr_tree) {
+[[maybe_unused]] void Expression::buildRpnList(const node &expr_tree) {
     evalTreeLevel(expr_tree);
 }
 
@@ -48,6 +48,10 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                 op.column = child_node.col_offset;
                 rpnList.push_back(op);
             }
+            else if (child_node.type == xs_index) {
+                throw CasmErrorException("Unexpected index specifier in expression.",
+                                         child_node.lineno, child_node.col_offset);
+            }
             else {
                 evalTreeLevel(child_node);
                 if (!op_stack.empty()) {
@@ -78,11 +82,11 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                     op_stack.push(op);
                     break;
                 case LESS:
-                    op.opType = (expr_tree.type == factor || expr_tree.type == ni_factor) ? OpType::low_byte : OpType::less;
+                    op.opType = (expr_tree.type == factor) ? OpType::low_byte : OpType::less;
                     op_stack.push(op);
                     break;
                 case GREATER:
-                    op.opType = (expr_tree.type == factor || expr_tree.type == ni_factor) ? OpType::high_byte : OpType::greater;
+                    op.opType = (expr_tree.type == factor) ? OpType::high_byte : OpType::greater;
                     op_stack.push(op);
                     break;
                 case EQEQUAL:
@@ -114,23 +118,23 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                     op_stack.push(op);
                     break;
                 case LEFTSHIFT:
-                    op.opType = (expr_tree.type == factor || expr_tree.type == ni_factor) ? OpType::low_word : OpType::shift_left;
+                    op.opType = (expr_tree.type == factor) ? OpType::low_word : OpType::shift_left;
                     op_stack.push(op);
                     break;
                 case RIGHTSHIFT:
-                    op.opType = (expr_tree.type == factor || expr_tree.type == ni_factor) ? OpType::seg_byte : OpType::shift_right;
+                    op.opType = (expr_tree.type == factor) ? OpType::seg_byte : OpType::shift_right;
                     op_stack.push(op);
                     break;
                 case PLUS:
-                    op.opType = (expr_tree.type == factor || expr_tree.type == ni_factor) ? OpType::positive : OpType::plus;
+                    op.opType = (expr_tree.type == factor) ? OpType::positive : OpType::plus;
                     op_stack.push(op);
                     break;
                 case MINUS:
-                    op.opType = (expr_tree.type == factor || expr_tree.type == ni_factor) ? OpType::negative : OpType::minus;
+                    op.opType = (expr_tree.type == factor) ? OpType::negative : OpType::minus;
                     op_stack.push(op);
                     break;
                 case STAR:
-                    if (expr_tree.type == atom || expr_tree.type == ni_atom) {
+                    if (expr_tree.type == atom) {
                         op.type = ExpItemType::cur_loc;
                         rpnList.push_back(op);
                     } else {
@@ -170,7 +174,8 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                         }
                     }
                     catch (out_of_range &ex) {
-                        throw CasmErrorException("Integer is too big.", child_node.lineno, child_node.col_offset);
+                        throw CasmErrorException("Integer is too big.",
+                                                 child_node.lineno, child_node.col_offset);
                     }
                     op.type = ExpItemType::number;
                     op.value = num;

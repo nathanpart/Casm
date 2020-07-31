@@ -56,7 +56,7 @@ class Expression {
 
     void evalTreeLevel(const node& expr_tree);
 public:
-    void buildRpnList(const node& expr_tree);
+    [[maybe_unused]] void buildRpnList(const node& expr_tree);
     std::variant<Value, std::string> evaluate(AsmState &state);
 };
 
