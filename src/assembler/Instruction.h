@@ -19,7 +19,7 @@ public:
     virtual int getSize(Line &Line, AsmState &state) = 0;
     virtual void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) = 0;
 
-    static void createInstruction(node &node, Line &line);
+    static void createInstruction(node &inst_node, Line &line);
 };
 
 

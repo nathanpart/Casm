@@ -23,57 +23,58 @@
 #include "../Parser/graminit.h"
 #include "Instruction.h"
 
-void Instruction::createInstruction(node &node, Line &curLine) {
-    switch (node.type) {
+void Instruction::createInstruction(node &inst_node, Line &curLine) {
+    node &child = inst_node.child.front();
+    switch (inst_node.type) {
         case op_code:
-            switch (node.child.front().type) {
+            switch (child.type) {
                 case GROUP1_INST:
-                    Group1::createInstruction(node, curLine);
+                    Group1::createInstruction(child, curLine);
                     break;
                 case GROUP2_INST:
-                    Group2::createInstruction(node, curLine);
+                    Group2::createInstruction(child, curLine);
                     break;
                 case GROUP3_INST:
-                    Group3::createInstruction(node, curLine);
+                    Group3::createInstruction(child, curLine);
                     break;
                 case GROUP4_INST:
-                    Group4::createInstruction(node, curLine);
+                    Group4::createInstruction(child, curLine);
                     break;
                 case GROUP5_INST:
-                    Group5::createInstruction(node, curLine);
+                    Group5::createInstruction(child, curLine);
                     break;
                 case GROUP6_INST:
-                    Group6::createInstruction(node, curLine);
+                    Group6::createInstruction(child, curLine);
                     break;
                 case GROUP7_INST:
-                    Group7::createInstruction(node, curLine);
+                    Group7::createInstruction(child, curLine);
                     break;
                 case GROUP8_INST:
-                    Group8::createInstruction(node, curLine);
+                    Group8::createInstruction(child, curLine);
                     break;
                 case GROUP9_INST:
-                    Group9::createInstruction(node, curLine);
+                    Group9::createInstruction(child, curLine);
                     break;
                 case GROUP10_INST:
-                    Group10::createInstruction(node, curLine);
+                    Group10::createInstruction(child, curLine);
                     break;
                 case GROUP11_INST:
-                    Group11::createInstruction(node, curLine);
+                    Group11::createInstruction(child, curLine);
                     break;
                 case GROUP12_INST:
-                    Group12::createInstruction(node, curLine);
+                    Group12::createInstruction(child, curLine);
                     break;
                 case GROUP13_INST:
-                    Group13::createInstruction(node, curLine);
+                    Group13::createInstruction(child, curLine);
                     break;
                 case GROUP14_INST:
-                    Group14::createInstruction(node, curLine);
+                    Group14::createInstruction(child, curLine);
                     break;
                 case GROUP15_INST:
-                    Group15::createInstruction(node, curLine);
+                    Group15::createInstruction(child, curLine);
                     break;
                 case GROUP16_INST:
-                    Group16::createInstruction(node, curLine);
+                    Group16::createInstruction(child, curLine);
                     break;
             }
 
