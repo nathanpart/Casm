@@ -12,10 +12,9 @@
 #include "Segment.h"
 #include "Symbols.h"
 
-using namespace std;
-
 //class Segment;
 struct Value;
+struct Line;
 //struct Symbol;
 //struct SymbolXref;
 
@@ -24,22 +23,19 @@ class AsmState {
 
     Segment *currentSegment = nullptr;
 
-    map<std::string, Segment> segments;
-    map<std::string, Symbol> globals;
-    map<std::string, SymbolXref> xrefs;
+    std::map<std::string, Segment> segments;
+    std::map<std::string, Symbol> globals;
+    std::map<std::string, SymbolXref> xrefs;
 
 public:
     CpuType cpuType = CpuType::CPU_6502;
-    bool isLong = false;
-    bool isDirectPage = false;
-    bool isWide = false;
-    bool isShort = false;
     bool isIndexWide = false;
     bool isAccumWide = false;
     bool isPassTwo = false;
+    Line *currentLine = nullptr;
 
     explicit AsmState(Assembler &assemble) : assembler(assemble) {}
-    bool resolveSymbol(const string& symbol_name, Value &value, int line, int col);
+    bool resolveSymbol(const std::string& symbol_name, Value &value, int line, int col);
     int getCurrentLocation(int line, int col);
 };
 

@@ -85,32 +85,27 @@ static state states_3[3] = {
 static const arc arcs_4_0[3] = {
     {10, 1},
     {24, 2},
-    {47, 3},
+    {47, 2},
 };
 static const arc arcs_4_1[1] = {
-    {48, 4},
+    {48, 3},
 };
 static const arc arcs_4_2[1] = {
     {0, 2},
 };
-static const arc arcs_4_3[2] = {
-    {48, 3},
-    {0, 3},
+static const arc arcs_4_3[1] = {
+    {59, 4},
 };
-static const arc arcs_4_4[1] = {
-    {59, 5},
+static const arc arcs_4_4[2] = {
+    {60, 3},
+    {0, 4},
 };
-static const arc arcs_4_5[2] = {
-    {60, 4},
-    {0, 5},
-};
-static state states_4[6] = {
+static state states_4[5] = {
     {3, arcs_4_0},
     {1, arcs_4_1},
     {1, arcs_4_2},
-    {2, arcs_4_3},
-    {1, arcs_4_4},
-    {2, arcs_4_5},
+    {1, arcs_4_3},
+    {2, arcs_4_4},
 };
 static const arc arcs_5_0[16] = {
     {61, 1},
@@ -168,23 +163,29 @@ static state states_6[5] = {
 static const arc arcs_7_0[1] = {
     {36, 1},
 };
-static const arc arcs_7_1[3] = {
+static const arc arcs_7_1[5] = {
     {83, 2},
-    {56, 3},
+    {77, 3},
+    {79, 3},
+    {56, 4},
     {0, 1},
 };
 static const arc arcs_7_2[1] = {
     {0, 2},
 };
-static const arc arcs_7_3[2] = {
-    {84, 2},
-    {0, 3},
+static const arc arcs_7_3[1] = {
+    {56, 4},
 };
-static state states_7[4] = {
+static const arc arcs_7_4[2] = {
+    {84, 2},
+    {0, 4},
+};
+static state states_7[5] = {
     {1, arcs_7_0},
-    {3, arcs_7_1},
+    {5, arcs_7_1},
     {1, arcs_7_2},
-    {2, arcs_7_3},
+    {1, arcs_7_3},
+    {2, arcs_7_4},
 };
 static const arc arcs_8_0[1] = {
     {37, 1},
@@ -945,13 +946,13 @@ static const dfa dfas[54] = {
      "\000\010\000\010\000\000\000\000\000\000\000\000\000\000\000\000\000\000"},
     {259, "region", 3, states_3,
      "\000\000\000\002\000\000\002\000\000\000\000\000\000\000\000\000\000\000"},
-    {260, "macro", 6, states_4,
+    {260, "macro", 5, states_4,
      "\000\004\000\001\000\200\000\000\000\000\000\000\000\000\000\000\000\000"},
     {261, "op_code", 2, states_5,
      "\000\000\000\360\377\017\000\000\000\000\000\000\000\000\000\000\000\000"},
     {262, "group1", 5, states_6,
      "\000\000\000\000\010\000\000\000\000\000\000\000\000\000\000\000\000\000"},
-    {263, "group2", 4, states_7,
+    {263, "group2", 5, states_7,
      "\000\000\000\000\020\000\000\000\000\000\000\000\000\000\000\000\000\000"},
     {264, "group3", 4, states_8,
      "\000\000\000\000\040\000\000\000\000\000\000\000\000\000\000\000\000\000"},

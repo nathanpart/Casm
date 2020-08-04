@@ -10,38 +10,69 @@
 
 class Group1 : public Instruction {
 public:
-    static void createInstruction(node &node, Line &line);
+    static void createInstruction(node &group_node, Line &asm_line);
 };
 
 class InstAdc : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
 
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 };
 
 class InstAnd : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
+
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 
 };
 
 class InstCmp : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
+
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 
 };
 
 class InstEor : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
+
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 
 };
 
 class InstLda : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
+
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 
 };
 
 class InstOra : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
+
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 
 };
 
 class InstSbc : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
+
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 
 };
 
 class InstSta : public Group1 {
+public:
+    int getSize(Line &Line, AsmState &state) override;
+
+    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
 
 };
 

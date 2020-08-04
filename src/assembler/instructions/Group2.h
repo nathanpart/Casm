@@ -10,7 +10,7 @@
 
 class Group2 : public Instruction {
 public:
-    static void createInstruction(node &node, Line &line);
+    static void createInstruction(node &group_node, Line &asm_line);
 };
 
 class InstAsl : public Group2 {

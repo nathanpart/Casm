@@ -15,25 +15,25 @@
 #include "Instruction.h"
 
 enum class AddressModes { imm, abs, abs_long, dp, dp_ind, dp_ind_long, abs_x, abs_y, abs_long_x, dp_x, dp_y,
-        dp_ind_x, dp_ind_y, dp_ind_long_y, sr, sr_ind_y, acc, rel, rel_long, imp, con, long_ind, abs_ind, abs_ind_x,
-        block};
+        dp_ind_x, dp_ind_y, dp_ind_long_y, sr, sr_ind_y, acc, rel, rel_long, imp, long_ind, abs_ind, abs_ind_x,
+        block, unknown};
 
 struct Line {
     std::string sourceName;
     std::string lineText;
-    int LineNumber;
-    int Level;
+    int LineNumber = 0;
+    int Level = 0;
 
 
     std::string label;
 
     std::unique_ptr<Instruction> instruction;
-    AddressModes addressMode;
-    int size;
-    bool hasWide;
-    bool hasShort;
-    bool hasLong;
-    bool hasDpZp;
+    AddressModes addressMode = AddressModes::unknown;
+    int size = 0;
+    bool hasWide = false;
+    bool hasShort = false;
+    bool hasLong = false;
+    bool hasDpZp = false;
 
     std::vector<Expression> expressionList;
 

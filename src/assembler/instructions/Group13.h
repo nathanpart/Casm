@@ -9,8 +9,10 @@
 #include "../Instruction.h"
 
 class Group13 : public Instruction {
+    bool isStz = false;
+
 public:
-    static void createInstruction(node &node, Line &line);
+    static void createInstruction(node &group_node, Line &asm_line);
 };
 
 class InstSty : public Group13 {

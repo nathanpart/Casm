@@ -3,27 +3,27 @@ line: [label] [op_code | pseudo_op | variable | region | macro ]  (NEWLINE|ENDMA
 label: NAME [ ':' | '?']
 variable: ('=' | EQU) exp
 region: SEGMENT [PARA | PAGE | exp] | ENDS
-macro: '.' NAME ARG (',' ARG)* | MACRO NAME* | ENDM
+macro: '.' NAME ARG (',' ARG)* | MACRO | ENDM
 
 op_code: (group1 | group2  | group3 | group4 | group5 | group6  | group7 | group8 |
           group9 | group10 | group11 | group12 | group13 | group14 | group15 | group16)
 
 group1: GROUP1_INST (imm_exp | [LONG | DP | ZP] exp [xys_index] | long_ind_exp)
-group2: GROUP2_INST ([AREG | exp [x_index]])
+group2: GROUP2_INST ([AREG | [DP | ZP] exp [x_index]])
 group3: GROUP3_INST ([LONG | DP | ZP] exp)
-group4: GROUP4_INST (imm_exp | exp [x_index])
-group5: GROUP5_INST (imm_exp | exp)
+group4: GROUP4_INST (imm_exp | [DP | ZP] exp [x_index])
+group5: GROUP5_INST (imm_exp | [DP | ZP] exp)
 group6: GROUP6_INST imm_exp
 group7: GROUP7_INST exp ',' exp
 group8: GROUP8_INST ([LONG] exp | jmp_long_ind_exp)
 group9: GROUP9_INST ([LONG] exp | jmp_long_ind_exp)
 group10: GROUP10_INST [LONG] exp
-group11: GROUP11_INST (imm_exp | exp [y_index])
-group12: GROUP12_INST exp [y_index]
-group13: GROUP13_INST exp [x_index]
+group11: GROUP11_INST (imm_exp | [DP | ZP] exp [y_index])
+group12: GROUP12_INST [DP | ZP] exp [y_index]
+group13: GROUP13_INST [DP | ZP] exp [x_index]
 group14: GROUP14_INST
 group15: GROUP15_INST exp
-group16: GROUP16_INST [imm_exp]
+group16: GROUP16_INST [['#'] exp]
 
 imm_exp: [WIDE | SHORT] '#' exp
 long_ind_exp: '[' exp ']' [y_index]

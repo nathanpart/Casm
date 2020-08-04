@@ -5,11 +5,14 @@
 #include "AsmState.h"
 #include "Segment.h"
 #include "Expression.h"
+#include "Line.h"
+
+using namespace std;
 
 bool AsmState::resolveSymbol(const string& symbol_name, Value &value, int line, int col) {
     auto dot_loc = symbol_name.find('.');
     if (dot_loc == string::npos && currentSegment != nullptr) {
-        bool success = currentSegment->resolveSymbol(symbol_name, value);
+        bool success = currentSegment->resolveSymbol(symbol_name, value, *this);
         if (!success && isPassTwo) {
             throw CasmErrorException("Symbol not found.", line, col);
         }
@@ -40,7 +43,7 @@ bool AsmState::resolveSymbol(const string& symbol_name, Value &value, int line, 
             return false;
         }
         if (!offset_name.empty()) {
-            bool success = seg_iter->second.resolveSymbol(offset_name, value);
+            bool success = seg_iter->second.resolveSymbol(offset_name, value, *this);
             if (success && value.isRelocatable()) {
                 if (currentSegment == nullptr) {
                     throw CasmErrorException("Cannot import an exportable to global scope.", line, col);
@@ -50,7 +53,7 @@ bool AsmState::resolveSymbol(const string& symbol_name, Value &value, int line, 
                 value.externalName = offset_name;
                 value.externalSeg = seg_name;
                 value.value = 0;
-                value.type = isLong ? ValueType::big : ValueType::relocatable;
+                value.type = currentLine->hasLong ? ValueType::big : ValueType::relocatable;
             }
             if (!success && isPassTwo) {
                 throw CasmErrorException("Symbol not found.", line, col);

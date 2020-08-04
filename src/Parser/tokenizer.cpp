@@ -177,7 +177,8 @@ int eval_name(string &work_line, short &type, std::string &str, int &length) {
             { GROUP14_INST, regex("^(pha|phb|phd|phk|php|phx|phy|pla|plb|pld|plp|plx|ply)", regex::icase)},
             { GROUP14_INST, regex("^(rti|rtl|rts|sec|sed|sei|stp)", regex::icase)},
             { GROUP14_INST, regex("^(tax|tay|tcd|tcs|tdc|tsc|tsx|txa|txs|txy|tya|tyx)", regex::icase)},
-            { GROUP14_INST, regex("^(wai|wdm|xba|xce)", regex::icase)},
+            { GROUP14_INST, regex("^(tad|tas|tda|tsa)", regex::icase)},
+            { GROUP14_INST, regex("^(wai|wdm|xba|swa|xce)", regex::icase)},
             { GROUP15_INST, regex("^pei", regex::icase)},
             { GROUP16_INST, regex("^(brk|cop)", regex::icase)},
 

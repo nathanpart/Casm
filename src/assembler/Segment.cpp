@@ -7,6 +7,7 @@
 #include "Segment.h"
 #include "Assembler.h"
 #include "AsmState.h"
+#include "Line.h"
 
 
 bool Segment::resolveSymbol(std::string symbol_name, Value &value, AsmState &state) {
@@ -44,7 +45,7 @@ bool Segment::resolveSymbol(std::string symbol_name, Value &value, AsmState &sta
         value.externalName = import.name;
         value.externalSeg = import.segmentName;
         value.value = 0;
-        value.type = state.isLong ? ValueType::big : ValueType::relocatable;
+        value.type = state.currentLine->hasLong ? ValueType::big : ValueType::relocatable;
         return true;
     }
 

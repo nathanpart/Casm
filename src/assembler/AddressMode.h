@@ -6,9 +6,10 @@
 #define CASM_ADDRESSMODE_H
 
 
-class AddressMode {
+#include "../Parser/node.h"
+#include "Line.h"
 
-};
-
+bool isExpTreeIndirect(node *&exp_node, bool &hasXIndex, bool &hasSIndex);
+int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum = true);
 
 #endif //CASM_ADDRESSMODE_H
