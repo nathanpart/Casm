@@ -35,6 +35,9 @@ struct Line {
     bool hasLong = false;
     bool hasDpZp = false;
 
+    bool hasPara = false;
+    bool hasPage = false;
+
     std::vector<Expression> expressionList;
 
 

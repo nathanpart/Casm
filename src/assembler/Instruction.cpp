@@ -22,9 +22,17 @@
 #include "../Parser/token.h"
 #include "../Parser/graminit.h"
 #include "Instruction.h"
+#include "PseudoOp.h"
+#include "Line.h"
+#include "Variable.h"
+#include "Region.h"
+#include "Macro.h"
+
+using namespace std;
 
 void Instruction::createInstruction(node &inst_node, Line &curLine) {
     node &child = inst_node.child.front();
+    Expression expression;
     switch (inst_node.type) {
         case op_code:
             switch (child.type) {
@@ -77,7 +85,44 @@ void Instruction::createInstruction(node &inst_node, Line &curLine) {
                     Group16::createInstruction(child, curLine);
                     break;
             }
+            break;
 
+        case pseudo_op:
+            PseudoOp::createInstruction(inst_node, curLine);
+            break;
+
+        case variable:
+            curLine.instruction = unique_ptr<Instruction>(new Variable);
+            expression.buildRpnList(inst_node.child.back());
+            curLine.expressionList.push_back(expression);
+            break;
+
+        case region:
+            for (const auto &region_node: inst_node.child) {
+                switch (region_node.type) {
+                    case PARA:
+                        curLine.hasPara = true;
+                        break;
+                    case PAGE:
+                        curLine.hasPage = true;
+                        break;
+                    case exp:
+                        expression.buildRpnList(region_node);
+                        curLine.expressionList.push_back(expression);
+                        break;
+                    case SEGMENT:
+                        curLine.instruction = unique_ptr<Instruction>(new Region(false));
+                        break;
+                    case ENDS:
+                        curLine.instruction = unique_ptr<Instruction>(new Region(true));
+                        break;
+                }
+            }
+            break;
+
+        case macro:
+            Macro::createInstruction(inst_node, curLine);
+            break;
     }
 
 }

@@ -62,7 +62,7 @@ define_storage: DS exp
 align: ALIGN (PARA | PAGE)
 block: BLOCK exp
 
-if_def: (IFDEF | IFNDEF) NAME
+if_def: (IFDEF | IFNDEF) exp
 iff: IF exp
 
 

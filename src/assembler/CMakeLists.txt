@@ -11,6 +11,10 @@ target_sources(assembler
         AddressMode.cpp
         Instruction.cpp
         AsmState.cpp
+        PseudoOp.cpp
+        Variable.cpp
+        Region.cpp
+        Macro.cpp
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/Line.h
         ${CMAKE_CURRENT_LIST_DIR}/Assembler.h
@@ -22,6 +26,10 @@ target_sources(assembler
         ${CMAKE_CURRENT_LIST_DIR}/AddressMode.h
         ${CMAKE_CURRENT_LIST_DIR}/Instruction.h
         ${CMAKE_CURRENT_LIST_DIR}/AsmState.h
+        ${CMAKE_CURRENT_LIST_DIR}/PseudoOp.h
+        ${CMAKE_CURRENT_LIST_DIR}/Variable.h
+        ${CMAKE_CURRENT_LIST_DIR}/Region.h
+        ${CMAKE_CURRENT_LIST_DIR}/Macro.h
 )
 
 target_include_directories(assembler
