@@ -7,19 +7,16 @@
 
 #include <string>
 #include <map>
-#include "Assembler.h"
 
 #include "Segment.h"
 #include "Symbols.h"
 
-//class Segment;
 struct Value;
 struct Line;
-//struct Symbol;
-//struct SymbolXref;
+
+enum class CpuType {CPU_6502, CPU_65C02, CPU_65C816};
 
 class AsmState {
-    Assembler &assembler;
 
     Segment *currentSegment = nullptr;
 
@@ -34,7 +31,6 @@ public:
     bool isPassTwo = false;
     Line *currentLine = nullptr;
 
-    explicit AsmState(Assembler &assemble) : assembler(assemble) {}
     bool resolveSymbol(const std::string& symbol_name, Value &value, int line, int col);
     int getCurrentLocation(int line, int col);
 };

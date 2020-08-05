@@ -12,50 +12,57 @@
 #include <tuple>
 #include <utility>
 #include <exception>
+#include <vector>
+
 #include "../Parser/tokenizer.h"
 #include "../Parser/node.h"
+#include "Line.h"
+#include "Location.h"
+#include "Macro.h"
 
-enum class CpuType {CPU_6502, CPU_65C02, CPU_65C816};
 
 enum class SourceType {MAIN_FILE, INCLUDE, MACRO_EXPANSION};
 
 class SourceItem {
+    Location location;
     std::unique_ptr<tokenizer> sourceTokenizer;
     SourceType sourceType;
-    std::string name;
     std::unique_ptr<std::istream> sourceStream;
-    int lineNumber;
-    int startColumn;
+    bool eofFlag = false;
+
 public:
     SourceItem(std::ifstream &file, const std::string &fileName, SourceType type);
     SourceItem(const std::string& source, std::string sourceTitle, SourceType type, int firstLine = 1);
 
     // returns parse_tree, error_code, line_text, source_name
-    std::tuple<std::shared_ptr<node>, int, std::string, std::string> getParsedLine();
+    std::tuple<std::shared_ptr<node>, std::string> getParsedLine();
 
     // returns line_text, error_code, line_number
-    std::tuple<std::string, int, int> getLine();
+    std::string getLine();
 
-    std::pair<int, int> getLocation() {
-        return std::pair(lineNumber, startColumn);
+    Location getLocation() {
+        return location;
+    }
+
+    [[nodiscard]] bool atEof() const {
+        return eofFlag;
     }
 };
 
 class CasmErrorException : public std::exception {
     const std::string error_msg;
-    int lineNumber;
-    int column;
+    Location location;
 
 public:
-    CasmErrorException(std::string  err_mag, int lineNumber, int column)
-        : error_msg(std::move(err_mag)), lineNumber(lineNumber), column(column) {}
+    CasmErrorException(std::string  err_mag, Location loc)
+        : error_msg(std::move(err_mag)), location(std::move(loc)) {}
 
     [[nodiscard]] const char* what() const noexcept override {
         return error_msg.c_str();
     }
 
-    std::pair<int, int> getLocation() {
-        return std::pair(lineNumber, column);
+    Location getLocation() {
+        return location;
     }
 };
 
@@ -81,15 +88,15 @@ class Assembler {
     int errorLimit = 10;
 
     std::unique_ptr<AsmState> state;
+    std::vector<Line> lines;
+    Macro macros;
 
 public:
     explicit Assembler(std::string sourceName, std::string objectName="",
             std::string listingName = "", std::string xrefName = "");
     void assemble();
-    void pass1();
+    void pre_process();
     void pass2();
-    bool processTree(std::shared_ptr<node> tree, std::string name);
-    bool resolveSymbol(std::string symbol_name, bool &is_relocatable, Value &value);
 };
 
 void printErrorMsg(const std::string& msg, int lineNumber, int column, const std::string& lineText);

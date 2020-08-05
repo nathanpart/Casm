@@ -14,19 +14,19 @@
 using namespace std;
 
 // Additional stack operations
-int ParserStack::shift(short type, string str, int newState, int lineno, int col_offset) {
+int ParserStack::shift(short type, const string& str, int newState, Location loc) {
     assert(!empty());
-    int err = top().i_parent.addChild(type, move(str), lineno, col_offset);
+    int err = top().i_parent.addChild(type, str, std::move(loc));
     if (err)
         return err;
     top().i_state = newState;
     return 0;
 }
 
-int ParserStack::ppush(short type, const dfa *d, int newState, int lineno, int col_offset) {
+int ParserStack::ppush(short type, const dfa *d, int newState, Location loc) {
     assert(!empty());
     node &n = top().i_parent;
-    int err = n.addChild(type, "", lineno, col_offset);
+    int err = n.addChild(type, "", std::move(loc));
     if (err) {
         return err;
     }
@@ -45,7 +45,7 @@ Parser::Parser() : i_grammar(casmGrammar), i_tree(std::make_shared<node>(i_gramm
     i_stack.push(StackEntry(i_grammar.findDFA(i_grammar.g_start), *i_tree));
 }
 
-int Parser::addToken(short type, const string& str, int lineno, int col_offset) {
+int Parser::addToken(short type, const string& str, const Location& loc) {
     int iLabel;
     int err;
 
@@ -68,14 +68,14 @@ int Parser::addToken(short type, const string& str, int lineno, int col_offset) 
                     auto nt = static_cast<short>((x >> 8) + NT_OFFSET);
                     int arrow = x & ((1 << 7) - 1);
                     const dfa *d1 = i_grammar.findDFA(nt);
-                    if ((err = i_stack.ppush(nt, d1, arrow, lineno, col_offset)) > 0) {
+                    if ((err = i_stack.ppush(nt, d1, arrow, loc)) > 0) {
                         return err;
                     }
                     continue;
                 }
 
                 // Shift the token
-                if ((err = i_stack.shift(type, str, x, lineno, col_offset)) > 0) {
+                if ((err = i_stack.shift(type, str, x, loc)) > 0) {
                     return err;
                 }
 

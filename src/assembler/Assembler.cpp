@@ -10,44 +10,48 @@
 
 #include "Assembler.h"
 #include "AsmState.h"
+#include "Line.h"
+
 #include "../Parser/Parser.h"
 #include "../Parser/errcode.h"
 #include "../Parser/graminit.h"
+#include "MacroLine.h"
 
 
 using namespace std;
 
 SourceItem::SourceItem(std::ifstream &file, const string &fileName, SourceType type) {
-    name = fileName;
+    location.locationName = fileName;
+    location.lineNumber = 0;
+    location.column = 0;
     sourceType = type;
-    lineNumber = 1;
-    startColumn = 0;
     sourceStream = make_unique<istream>(file.rdbuf());
     sourceTokenizer = make_unique<tokenizer>(*sourceStream);
 }
 
 SourceItem::SourceItem(const string& source, string sourceTitle, SourceType type, int firstLine) {
-    name = move(sourceTitle);
+    location.locationName = move(sourceTitle);
+    location.lineNumber = firstLine;
+    location.column = 0;
     sourceType = type;
-    lineNumber = firstLine;
-    startColumn = 0;
     sourceStream = make_unique<istream>(istringstream(source).rdbuf());
     sourceTokenizer = make_unique<tokenizer>(*sourceStream);
 }
 
-tuple<shared_ptr<node>, int, string, string> SourceItem::getParsedLine() {
+tuple<shared_ptr<node>, string> SourceItem::getParsedLine() {
     Parser parser;
     short token_type;
     string token_string;
     string line_string;
     int error_code;
 
+    location.lineNumber++;
     while (true) {
-        error_code = sourceTokenizer->getToken(token_type, token_string, line_string, startColumn);
+        error_code = sourceTokenizer->getToken(token_type, token_string, line_string, location.column);
         if (error_code != E_OK) {
             break;
         }
-        error_code = parser.addToken(token_type, token_string, lineNumber, startColumn);
+        error_code = parser.addToken(token_type, token_string, location);
         if (error_code != E_OK) {
             if (error_code == E_DONE)
                 error_code = E_OK;
@@ -55,40 +59,38 @@ tuple<shared_ptr<node>, int, string, string> SourceItem::getParsedLine() {
         }
     }
     if (error_code != E_OK) {
-        string msg;
+        sourceTokenizer->endLine();
         switch(error_code) {
             case E_STREAM:
-                cerr << "ERROR -- Unable to read from source file: " << name << "\n\n";
-                break;
+                throw CasmErrorException("Unable to read from source file.", location);
             case E_EOL:
-                msg = "ERROR -- End of line reached finding closing delimiter in " + name + "\n";
-                printErrorMsg(msg, lineNumber, startColumn, line_string);
-                break;
+                throw CasmErrorException("End of line reached before finding closing delimiter.", location);
             case E_TOKEN:
-                msg = "ERROR -- Unrecognized symbol found in " + name + "\n";
-                printErrorMsg(msg, lineNumber, startColumn, line_string);
-                break;
+                throw CasmErrorException("Unrecognized symbol found.", location);
             default:
-                msg = "ERROR -- Syntax error in " + name + "\n";
-                printErrorMsg(msg, lineNumber, startColumn, line_string);
+                throw CasmErrorException("Syntax error.", location);
         }
-        sourceTokenizer->endLine();   // Recover by advancing to next line
     }
-    return make_tuple(parser.getTree(), error_code, line_string, name);
+    return make_tuple(parser.getTree(), line_string);
 }
 
-tuple<std::string, int, int> SourceItem::getLine() {
+std::string SourceItem::getLine() {
+    eofFlag = false;
     string line_text;
     int err = E_OK;
     sourceTokenizer->endLine();           // Make sure tokenizer will start from a fresh line for the next token
+    location.lineNumber++;
     if (!getline(*sourceStream, line_text)) {
         err = sourceStream->eof() ? E_EOF : E_STREAM;
         if (err == E_STREAM) {
-            cerr << "ERROR -- Unable to read from source file: " << name << "\n\n";
+            throw CasmErrorException("Unable to read from source file.", location);
+        }
+        else {
+            eofFlag = true;
         }
     }
 
-    return make_tuple(line_text, err, lineNumber++);
+    return line_text;
 }
 
 
@@ -130,26 +132,47 @@ void Assembler::assemble() {
 
 }
 
-void Assembler::pass1() {
+void Assembler::pre_process() {
+    Line current_line;
     sourceStack.push(SourceItem(*sourceStream, sourceFilename, SourceType::MAIN_FILE));
 
     while (!sourceStack.empty()) {
-        shared_ptr<node> tree;
-        int error_code;
-        int line_number;
-        int next_line;
-        int column;
-        string line_text;
-        string name;
+        try {
+            shared_ptr<node> tree;
+            string line_text;
+            string name;
 
-        tie(tree, error_code, line_text, name) = sourceStack.top().getParsedLine();
-        if (error_code != E_OK) {
+            tie(tree, line_text) = sourceStack.top().getParsedLine();
+            current_line = Line();
+            current_line.location = sourceStack.top().getLocation();
+            current_line.lineText = line_text;
+            if (current_line.fromTree(*tree)) {
+                if (current_line.lineType == LineTypes::macro) {
+                    auto macro_line = dynamic_cast<MacroLine *>(current_line.instruction.get());
+                    if (macro_line->isDef()) {
+                        macros.addMacro(sourceStack.top(), macro_line->getName());
+                    } else {
+                        Location mac_loc = sourceStack.top().getLocation();
+                        auto *loc_ptr = &mac_loc;
+
+                        string mac_lines = macros.expandMacro(loc_ptr, macro_line->getName(),
+                                                              macro_line->getArgs());
+                        auto macroSource = SourceItem(mac_lines, loc_ptr->locationName,
+                                                      SourceType::MACRO_EXPANSION, loc_ptr->lineNumber);
+                        sourceStack.push(macroSource);
+                    }
+                }
+                lines.push_back(current_line);
+            } else {
+                sourceStack.pop();
+            }
+        }
+        catch (CasmErrorException &ce) {
+            auto msg = ce.what();
+            auto where = ce.getLocation();
             errorCount++;
             if (errorCount > errorLimit)
                 return;
-        }
-        if (processTree(tree, name)) {
-            sourceStack.pop();
         }
     }
 }
@@ -158,44 +181,21 @@ void Assembler::pass2() {
 
 }
 
-bool Assembler::processTree(std::shared_ptr<node> tree, std::string name) {
-    bool returnCode = tree->child.back().type == ENDMARKER;
-    string labelName;
-    bool localLabel = false;
-
-    for (auto child: tree->child) {
-        if (child.type == label) {
-            labelName = child.child.front().str;  // label: NAME [':']
-            if (child.child.size() > 1)
-                localLabel = true;
-        }
-    }
-
-    // Exit if blank line
-    if (tree->child.size() == 1) {
-        return returnCode;
-    }
-
-    // Fetch a label if one is present
-
-}
 
 Assembler::Assembler(std::string sourceName, std::string objectName, std::string listingName, std::string xrefName)
         : sourceFilename(std::move(sourceName)), objectFilename(std::move(objectName)),
           listingFilename(std::move(listingName)), xrefFilename(std::move(xrefName)) {
-    state = make_unique<AsmState>(*this);
+    state = make_unique<AsmState>();
 
 }
 
-bool Assembler::resolveSymbol(std::string symbol_name, bool &is_relocatable, Value &value) {
-    return false;
-}
 
-void printErrorMsg(const std::string& msg, int lineNumber, int column, const string& lineText) {
-    cerr << msg << "\n";
+void printErrorMsg(const std::string& msg, const Location& loc, const string& lineText) {
+    cerr << "Error:" << msg << "\n";
+
     cerr << lineText << "\n";
-    for (int i = 0; i < column - 2; i++)
+    for (int i = 0; i < loc.column; i++)
         cerr << " ";
-    cerr << "--^\n";
-    cerr << "Line: " << lineNumber << " Column: " << column << "\n\n";
+    cerr << "^~~\n";
+    cerr << loc.locationName << " - Line: " << loc.lineNumber << " Column: " << loc.column << "\n\n";
 }

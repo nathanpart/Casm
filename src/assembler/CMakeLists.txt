@@ -14,7 +14,9 @@ target_sources(assembler
         PseudoOp.cpp
         Variable.cpp
         Region.cpp
+        MacroLine.cpp
         Macro.cpp
+        Location.cpp
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/Line.h
         ${CMAKE_CURRENT_LIST_DIR}/Assembler.h
@@ -29,7 +31,10 @@ target_sources(assembler
         ${CMAKE_CURRENT_LIST_DIR}/PseudoOp.h
         ${CMAKE_CURRENT_LIST_DIR}/Variable.h
         ${CMAKE_CURRENT_LIST_DIR}/Region.h
+        ${CMAKE_CURRENT_LIST_DIR}/MacroLine.h
         ${CMAKE_CURRENT_LIST_DIR}/Macro.h
+        ${CMAKE_CURRENT_LIST_DIR}/Location.h
+
 )
 
 target_include_directories(assembler

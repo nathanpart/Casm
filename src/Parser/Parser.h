@@ -21,8 +21,8 @@ struct StackEntry {
 
 class ParserStack : public std::stack<StackEntry> {
 public:
-    int shift(short type, std::string str, int newState, int lineno, int col_offset);
-    int ppush(short type, const dfa *d, int newState, int lineno, int col_offset);
+    int shift(short type, const std::string& str, int newState, Location loc);
+    int ppush(short type, const dfa *d, int newState, Location loc);
 };
 
 
@@ -36,7 +36,7 @@ class Parser {
 
 public:
     Parser();
-    int addToken(short type, const std::string& str,  int lineno, int col_offset);
+    int addToken(short type, const std::string& str,  const Location& loc);
     std::shared_ptr<node> getTree() {
         return i_tree;
     }

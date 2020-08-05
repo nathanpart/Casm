@@ -26,7 +26,7 @@
 #include "Line.h"
 #include "Variable.h"
 #include "Region.h"
-#include "Macro.h"
+#include "MacroLine.h"
 
 using namespace std;
 
@@ -35,6 +35,7 @@ void Instruction::createInstruction(node &inst_node, Line &curLine) {
     Expression expression;
     switch (inst_node.type) {
         case op_code:
+            curLine.lineType = LineTypes::cpu;
             switch (child.type) {
                 case GROUP1_INST:
                     Group1::createInstruction(child, curLine);
@@ -88,16 +89,19 @@ void Instruction::createInstruction(node &inst_node, Line &curLine) {
             break;
 
         case pseudo_op:
+            curLine.lineType = LineTypes::pseudo_op;
             PseudoOp::createInstruction(inst_node, curLine);
             break;
 
         case variable:
+            curLine.lineType = LineTypes::variable;
             curLine.instruction = unique_ptr<Instruction>(new Variable);
             expression.buildRpnList(inst_node.child.back());
             curLine.expressionList.push_back(expression);
             break;
 
         case region:
+            curLine.lineType = LineTypes::segment;
             for (const auto &region_node: inst_node.child) {
                 switch (region_node.type) {
                     case PARA:
@@ -121,7 +125,8 @@ void Instruction::createInstruction(node &inst_node, Line &curLine) {
             break;
 
         case macro:
-            Macro::createInstruction(inst_node, curLine);
+            curLine.lineType = LineTypes::macro;
+            MacroLine::createInstruction(inst_node, curLine);
             break;
     }
 

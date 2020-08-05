@@ -13,7 +13,7 @@ using namespace std;
 bool Line::fromTree(node &tree) {
    for (auto &node: tree.child) {
        if (ISTERMINAL(node.type)) {
-           return node.type == ENDMARKER;
+           return node.type != ENDMARKER;
        }
 
        if (node.type == ::label) {
@@ -29,5 +29,5 @@ bool Line::fromTree(node &tree) {
            Instruction::createInstruction(node, *this);
        }
    }
-   return false;
+   return true;
 }

@@ -11,8 +11,8 @@ void node::listTree() const {
 
 }
 
-int node::addChild(short child_type, std::string child_str, int line_num, int column_offset) {
-    node n = node(child_type, std::move(child_str), line_num, column_offset, 0);
+int node::addChild(short child_type, string child_str, Location loc) {
+    node n = node(child_type, std::move(child_str), std::move(loc), 0);
     child.push_back(n);
     return 0;
 }
