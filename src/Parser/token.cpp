@@ -18,6 +18,7 @@ const char * const casmTokenNames[] = {
     "ARG",
     "MACRO",
     "ENDM",
+    "INCLUDE",
     "GROUP1_INST",
     "GROUP2_INST",
     "GROUP3_INST",

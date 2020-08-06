@@ -16,11 +16,12 @@
 #include "../Parser/errcode.h"
 #include "../Parser/graminit.h"
 #include "MacroLine.h"
+#include "IncludeLine.h"
 
 
 using namespace std;
 
-SourceItem::SourceItem(std::ifstream &file, const string &fileName, SourceType type) {
+SourceItem::SourceItem(ifstream &file, const string &fileName, SourceType type) {
     location.locationName = fileName;
     location.lineNumber = 0;
     location.column = 0;
@@ -162,8 +163,29 @@ void Assembler::pre_process() {
                         sourceStack.push(macroSource);
                     }
                 }
-                lines.push_back(current_line);
+                else if (current_line.lineType == LineTypes::include) {
+                    auto include_line = dynamic_cast<IncludeLine *>(current_line.instruction.get());
+                    string file_name = include_line->getName();
+                    if (includeList.count(file_name) > 0) {
+                        throw CasmErrorException("Recursive include file detected.",
+                                                 sourceStack.top().getLocation());
+                    }
+                    includeList.insert(file_name);
+                    ifstream include_file = ifstream(file_name);
+                    if (include_file.fail()) {
+                        throw CasmErrorException("Unable to open include file.",
+                                                 sourceStack.top().getLocation());
+                    }
+                    auto include_source = SourceItem(include_file, file_name, SourceType::INCLUDE);
+                    sourceStack.push(include_source);
+                }
+                else {
+                    lines.push_back(current_line);
+                }
             } else {
+                if (sourceStack.top().getType() == SourceType::INCLUDE) {
+                    includeList.erase(sourceStack.top().getName());
+                }
                 sourceStack.pop();
             }
         }

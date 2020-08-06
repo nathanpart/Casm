@@ -16,8 +16,8 @@ enum class AddressMode;
 
 class Instruction {
 public:
-    virtual int getSize(Line &Line, AsmState &state) = 0;
-    virtual void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) = 0;
+    virtual int getSize(Line &Line, AsmState &state) { return 0; }
+    virtual void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {}
 
     static void createInstruction(node &inst_node, Line &line);
 };

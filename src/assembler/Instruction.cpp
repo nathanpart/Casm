@@ -27,6 +27,7 @@
 #include "Variable.h"
 #include "Region.h"
 #include "MacroLine.h"
+#include "IncludeLine.h"
 
 using namespace std;
 
@@ -128,6 +129,12 @@ void Instruction::createInstruction(node &inst_node, Line &curLine) {
             curLine.lineType = LineTypes::macro;
             MacroLine::createInstruction(inst_node, curLine);
             break;
+
+        case include:
+            curLine.lineType = LineTypes::include;
+            IncludeLine::createInstruction(inst_node, curLine);
+            break;
+
     }
 
 }

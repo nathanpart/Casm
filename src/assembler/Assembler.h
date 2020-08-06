@@ -13,6 +13,7 @@
 #include <utility>
 #include <exception>
 #include <vector>
+#include <set>
 
 #include "../Parser/tokenizer.h"
 #include "../Parser/node.h"
@@ -47,6 +48,15 @@ public:
     [[nodiscard]] bool atEof() const {
         return eofFlag;
     }
+
+    [[nodiscard]] SourceType getType() const {
+        return sourceType;
+    }
+
+    [[nodiscard]] std::string getName() const {
+        return location.locationName;
+    }
+
 };
 
 class CasmErrorException : public std::exception {
@@ -90,6 +100,7 @@ class Assembler {
     std::unique_ptr<AsmState> state;
     std::vector<Line> lines;
     Macro macros;
+    std::set<std::string> includeList;
 
 public:
     explicit Assembler(std::string sourceName, std::string objectName="",

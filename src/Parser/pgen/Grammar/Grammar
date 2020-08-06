@@ -1,9 +1,10 @@
-line: [label] [op_code | pseudo_op | variable | region | macro ]  (NEWLINE|ENDMARKER)
+line: [label] [op_code | pseudo_op | variable | region | macro | include]  (NEWLINE|ENDMARKER)
 
 label: NAME [ ':' | '?']
 variable: ('=' | EQU) exp
 region: SEGMENT [PARA | PAGE | exp] | ENDS
 macro: '.' NAME ARG (',' ARG)* | MACRO | ENDM
+include: INCLUDE STRING
 
 op_code: (group1 | group2  | group3 | group4 | group5 | group6  | group7 | group8 |
           group9 | group10 | group11 | group12 | group13 | group14 | group15 | group16)
