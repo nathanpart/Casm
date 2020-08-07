@@ -18,6 +18,8 @@ target_sources(assembler
         Macro.cpp
         Location.cpp
         IncludeLine.cpp
+        SourceItem.cpp
+        Error.cpp
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/Line.h
         ${CMAKE_CURRENT_LIST_DIR}/Assembler.h
@@ -36,6 +38,9 @@ target_sources(assembler
         ${CMAKE_CURRENT_LIST_DIR}/Macro.h
         ${CMAKE_CURRENT_LIST_DIR}/Location.h
         ${CMAKE_CURRENT_LIST_DIR}/IncludeLine.h
+        ${CMAKE_CURRENT_LIST_DIR}/SourceItem.h
+        ${CMAKE_CURRENT_LIST_DIR}/Error.h
+
 
 )
 
