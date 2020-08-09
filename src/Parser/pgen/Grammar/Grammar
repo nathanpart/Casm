@@ -2,7 +2,7 @@ line: [label] [op_code | pseudo_op | variable | region | macro | include]  (NEWL
 
 label: NAME [ ':' | '?']
 variable: ('=' | EQU) exp
-region: SEGMENT [PARA | PAGE | exp] | ENDS
+region: SEGMENT [BYTE | WORD | DWORD | PARA | PAGE] [ABS | DP | ZP | STORAGE] [exp] | ENDS
 macro: '.' NAME ARG (',' ARG)* | MACRO | ENDM
 include: INCLUDE STRING
 
@@ -60,7 +60,7 @@ pseudo_op: (CPU6502 | CPU65C02 | CPU65C816 | WIDEA | SHORTA | WIDEXY | SHORTXY |
 define_byte: DB exp (',' exp)*
 define_word: (DW | DBW | DA) exp (',' exp)*
 define_storage: DS exp
-align: ALIGN (PARA | PAGE)
+align: ALIGN (BYTE | WORD | DWORD | PARA | PAGE)
 block: BLOCK exp
 
 if_def: (IFDEF | IFNDEF) exp

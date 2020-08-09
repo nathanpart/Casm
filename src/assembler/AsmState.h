@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 
+#include "Location.h"
 #include "Segment.h"
 #include "Symbols.h"
 
@@ -31,8 +32,22 @@ public:
     bool isPassTwo = false;
     Line *currentLine = nullptr;
 
-    bool resolveSymbol(const std::string& symbol_name, Value &value, int line, int col);
-    int getCurrentLocation(int line, int col);
+    bool resolveSymbol(const std::string& symbol_name, Value &value, Location &loc);
+    int getCurrentOffset(Location &loc);
+    void pass1(Line &line);
+    bool inSegment() {
+        return currentSegment != nullptr;
+    }
+    void endSegment() {
+        currentSegment->endSegment();
+        currentSegment = nullptr;
+    }
+    void enterSegment(std::string &name, SegmentType &seg_type, AlignType &align_type);
+    void assignSymbol(std::string &name);
+    void doAlignment(AlignType &align_type, Location &loc);
+    void enterBlock(int block_address) { currentSegment->enterBlock(block_address); }
+    bool inBlock() { inSegment() && currentSegment->inBlock(); }
+    void endBlock();
 };
 
 

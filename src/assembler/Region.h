@@ -5,17 +5,23 @@
 #ifndef CASM_REGION_H
 #define CASM_REGION_H
 
+#include <string>
 
 #include "Instruction.h"
 
+enum class AlignType;
+enum class SegmentType;
+
 class Region : public Instruction {
-    int isEnd;
+    bool isEndSegment = false;
+    std::string segmentName;
+    AlignType alignment;
+    SegmentType segmentType;
 
 public:
-    explicit Region(bool is_end = false) : isEnd(is_end) {};
-    int getSize(Line &Line, AsmState &state) override;
+    static void createInstruction(node &inst_node, Line &asm_line);
 
-    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 

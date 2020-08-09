@@ -20,14 +20,21 @@ enum class AddressModes { imm, abs, abs_long, dp, dp_ind, dp_ind_long, abs_x, ab
 
 enum class LineTypes { cpu, pseudo_op, variable, segment, macro, include};
 
+struct ExpItem {
+    Location loc;
+    Expression exp;
+};
+
 struct Line {
     std::string lineText;
     Location location;
 
     std::string label;
+    Location labelLoc;
 
     LineTypes lineType = LineTypes::cpu;
     std::unique_ptr<Instruction> instruction;
+    Location instructionLoc;
     AddressModes addressMode = AddressModes::unknown;
     int size = 0;
     bool hasWide = false;
@@ -38,26 +45,18 @@ struct Line {
     bool hasPara = false;
     bool hasPage = false;
 
-    std::vector<Expression> expressionList;
+
+    std::vector<ExpItem> expressionList;
 
 
     bool fromTree(node &tree);
 
     // Label field type queries
-    int getLength(AsmState &state) {
-        return instruction->getSize(*this, state);
-    }
-    bool isLocalLabel() {
-        return !label.empty() && label.back() == ':';
-    }
-    bool isVariable() {
-        return !label.empty() && label.back() == '&';
-    }
-    [[nodiscard]] bool hasLabel() const {
-        return !label.empty();
-    }
-    bool normalLabel() {
-        return !label.empty() && label.back() != ':' && label.back() != '&';
+    int getLength(AsmState &state) { return instruction->getSize(*this, state); }
+    bool isLocalLabel() { return !label.empty() && label.back() == ':'; }
+    bool isVariable() { return !label.empty() && label.back() == '&'; }
+    [[nodiscard]] bool hasLabel() const { return !label.empty(); }
+    bool normalLabel() { return !label.empty() && label.back() != ':' && label.back() != '&' };
     }
 
 

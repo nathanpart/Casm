@@ -73,7 +73,7 @@ int tokenizer::fetchLine(short &type, std::string &str, std::string &line_str, i
     column = 0;
     if (!getline(in_stream, line)) {
         int err = in_stream.eof() ? E_OK : E_STREAM;
-        type = (err == E_OK) ? ENDMARKER : ERRORTOKEN;
+        type = static_cast<short>((err == E_OK) ? ENDMARKER : ERRORTOKEN);
         str = "";
         line_str = line;
         start_col = 0;
@@ -185,6 +185,11 @@ int eval_name(string &work_line, short &type, std::string &str, int &length) {
             { EQU, regex("^equ", regex::icase)},
             { PARA, regex("^para", regex::icase)},
             { PAGE, regex("^page", regex::icase)},
+            { BYTE, regex("^byte", regex::icase)},
+            { WORD, regex("^word", regex::icase)},
+            { DWORD, regex("^dword", regex::icase)},
+            { ABS, regex("^abs", regex::icase)},
+            { STORAGE, regex("^storage", regex::icase)},
             { SEGMENT, regex("^segment", regex::icase)},
             { ENDS, regex("^ends", regex::icase)},
             { MACRO, regex("^macro", regex::icase)},

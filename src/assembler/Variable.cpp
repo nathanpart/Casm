@@ -3,11 +3,13 @@
 //
 
 #include "Variable.h"
+#include "Line.h"
+#include "Error.h"
 
-int Variable::getSize(Line &Line, AsmState &state) {
-    return 0;
-}
-
-void Variable::getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {
-
+void Variable::pass1(Line &asm_line, AsmState &state) {
+    if (!asm_line.normalLabel()) {
+        throw CasmErrorException("Cannot assign to local or variable labels.",
+                                 asm_line.labelLoc, asm_line.lineText);
+    }
+    state.assignSymbol(asm_line.label);
 }

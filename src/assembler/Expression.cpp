@@ -10,12 +10,14 @@
 #include "../Parser/graminit.h"
 #include "Assembler.h"
 #include "AsmState.h"
+#include "Error.h"
 
 using namespace std;
 
-static void evaluateString(ExpressionItem &exp_item);
+static void evaluateString(ExpressionItem &exp_item, string &line_text);
 
-[[maybe_unused]] void Expression::buildRpnList(const node &expr_tree) {
+[[maybe_unused]] void Expression::buildRpnList(const node &expr_tree, string &line_text) {
+    lineText = move(line_text);
     evalTreeLevel(expr_tree);
 }
 
@@ -44,13 +46,12 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                 ExpressionItem op;
                 op.type = ExpItemType::sym;
                 op.stringValue = str;
-                op.lineNumber = child_node.lineno;
-                op.column = child_node.col_offset;
+                op.loc = child_node.location;
                 rpnList.push_back(op);
             }
             else if (child_node.type == xs_index) {
                 throw CasmErrorException("Unexpected index specifier in expression.",
-                                         child_node.lineno, child_node.col_offset);
+                                         child_node.location, lineText);
             }
             else {
                 evalTreeLevel(child_node);
@@ -63,8 +64,7 @@ void Expression::evalTreeLevel(const node &expr_tree) {
         else {
             ExpressionItem op;
             op.type = ExpItemType::op;
-            op.lineNumber = child_node.lineno;
-            op.column = child_node.col_offset;
+            op.loc = child_node.location;
             Value num = {0, ValueType::absolute};
             string num_str;
             switch (child_node.type) {
@@ -157,7 +157,7 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                 case STRING:
                     op.type = ExpItemType::str;
                     op.stringValue = child_node.str;
-                    evaluateString(op);
+                    evaluateString(op, lineText);
                     rpnList.push_back(op);
                     break;
                 case NUMBER:
@@ -175,7 +175,7 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                     }
                     catch (out_of_range &ex) {
                         throw CasmErrorException("Integer is too big.",
-                                                 child_node.lineno, child_node.col_offset);
+                                                 child_node.location, lineText);
                     }
                     op.type = ExpItemType::number;
                     op.value = num;
@@ -190,11 +190,11 @@ void Expression::evalTreeLevel(const node &expr_tree) {
 
 }
 
-static void validateChar(ExpressionItem &item) {
+void Expression::validateChar(ExpressionItem &item) {
     if (item.type == ExpItemType::str) {
         if (item.stringValue.length() > 1) {
             throw CasmErrorException("Sting is not a single char in computation",
-                                     item.lineNumber, item.column);
+                                     item.loc, lineText);
         } else {
             item.value = {item.stringValue.front(), ValueType::absolute, false};
             item.type = ExpItemType::number;
@@ -202,20 +202,20 @@ static void validateChar(ExpressionItem &item) {
     }
 }
 
-static void popBinaryArgs(stack<ExpressionItem> &stack, ExpressionItem &lhs, ExpressionItem &rhs) {
-    rhs = stack.top();
-    stack.pop();
-    lhs = stack.top();
-    stack.pop();
+void Expression::popBinaryArgs(stack<ExpressionItem> &exp_stack, ExpressionItem &lhs, ExpressionItem &rhs) {
+    rhs = exp_stack.top();
+    exp_stack.pop();
+    lhs = exp_stack.top();
+    exp_stack.pop();
 }
 
-static void popUniArg(stack<ExpressionItem> &stack, ExpressionItem &arg) {
-    arg = stack.top();
-    stack.pop();
+void Expression::popUniArg(stack<ExpressionItem> &exp_stack, ExpressionItem &arg) {
+    arg = exp_stack.top();
+    exp_stack.pop();
 }
 
 
-static void validateArguments(ExpressionItem &lhs, ExpressionItem& rhs, OpType opType) {
+void Expression::validateArguments(ExpressionItem &lhs, ExpressionItem& rhs, OpType opType) {
     bool lhs_external = lhs.value.external;
     bool rhs_external = lhs.value.external;
 
@@ -236,43 +236,50 @@ static void validateArguments(ExpressionItem &lhs, ExpressionItem& rhs, OpType o
                 return;
             }
         }
-        int col = lhs.isRelocatable() ? lhs.column : rhs.column;
-        throw CasmErrorException("Bad computation with an relocatable item.", lhs.lineNumber, col);
+        Location loc = lhs.isRelocatable() ? lhs.loc : rhs.loc;
+        throw CasmErrorException("Bad computation with an relocatable item.", loc, lineText);
     }
     if ((opType == OpType::divide || opType == OpType::mod) && rhs.value.value == 0)  {
-        throw CasmErrorException("Trying to divide by 0.", rhs.lineNumber, rhs.column);
+        throw CasmErrorException("Trying to divide by 0.", rhs.loc, lineText);
     }
 }
 
-static void popArgValidate(stack<ExpressionItem> &stack, ExpressionItem &lhs) {
+void Expression::popArgValidate(stack<ExpressionItem> &stack, ExpressionItem &lhs) {
     lhs = stack.top();
     stack.pop();
     if (lhs.isRelocatable()) {
-        throw CasmErrorException("Bad computation with an relocatable item.", lhs.lineNumber, lhs.column);
+        throw CasmErrorException("Bad computation with an relocatable item.", lhs.loc, lineText);
     }
 }
 
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
-variant<Value, std::string> Expression::evaluate(AsmState &state) {
+void Expression::evaluate(AsmState &state) {
     stack<ExpressionItem> args;
 
+    if (rpnList.size() == 1 && rpnList.front().type == ExpItemType::str) {
+        evaluated = true;
+        expString.emplace(rpnList.front().stringValue);
+        expValue.reset();
+    }
     auto pos = rpnList.begin();
 
     while (pos != rpnList.end()) {
         if (pos->type == ExpItemType::sym) {
             Value exp_value = {0, ValueType::unknown};
-            if (!state.resolveSymbol(pos->stringValue, exp_value, pos->lineNumber, pos->column)) {
-                Value v = {0, ValueType::unknown};
-                return v;
+            if (!state.resolveSymbol(pos->stringValue, exp_value, pos->loc)) {
+                evaluated = false;
+                expString.reset();
+                expValue.reset();
+                return;
             }
             pos->type = ExpItemType::number;
             pos->value = exp_value;
         }
         if (pos->type == ExpItemType::cur_loc) {
             pos->type = ExpItemType::number;
-            pos->value = {state.getCurrentLocation(pos->lineNumber, pos->column),
+            pos->value = {state.getCurrentOffset(pos->loc),
                           ValueType::relocatable, false};
         }
         if (pos->type != ExpItemType::op) {
@@ -332,7 +339,7 @@ variant<Value, std::string> Expression::evaluate(AsmState &state) {
                 args.pop();
                 if (lhs.isRelocatableByte()) {
                     throw CasmErrorException("Cannot apply byte operator to byte relocatable.",
-                            lhs.lineNumber, lhs.column);
+                            lhs.loc, lineText);
                 }
                 if (lhs.isRelocatable()) {
                     lhs.value.baseValue = lhs.value.value;
@@ -349,7 +356,7 @@ variant<Value, std::string> Expression::evaluate(AsmState &state) {
                 args.pop();
                 if (lhs.isRelocatableByte()) {
                     throw CasmErrorException("Cannot apply byte operator to byte relocatable.",
-                                             lhs.lineNumber, lhs.column);
+                                             lhs.loc, lineText);
                 }
                 if (lhs.isRelocatable()) {
                     lhs.value.baseValue = lhs.value.value;
@@ -366,7 +373,7 @@ variant<Value, std::string> Expression::evaluate(AsmState &state) {
                 args.pop();
                 if (lhs.value.type != ValueType::big) {
                     throw CasmErrorException("Cannot apply seg byte operator a non big value.",
-                                             lhs.lineNumber, lhs.column);
+                                             lhs.loc, lineText);
                 }
                 if (lhs.isRelocatable()) {
                     lhs.value.baseValue = lhs.value.value;
@@ -383,7 +390,7 @@ variant<Value, std::string> Expression::evaluate(AsmState &state) {
                 args.pop();
                 if (lhs.value.type != ValueType::big) {
                     throw CasmErrorException("Cannot apply seg byte operator a non big value.",
-                                             lhs.lineNumber, lhs.column);
+                                             lhs.loc, lineText);
                 }
                 if (lhs.isRelocatable()) {
                     lhs.value.baseValue = lhs.value.value;
@@ -484,12 +491,25 @@ variant<Value, std::string> Expression::evaluate(AsmState &state) {
         pos++;
     }
     ExpressionItem ei = args.top();
-    if (ei.type == ExpItemType::str) {
-        return ei.stringValue;
-    } else {
-        return ei.value;
-    }
+    evaluated = true;
+    expValue.emplace(ei.value);
+    expString.reset();
 }
+
+ExpValue Expression::getValue(AsmState &state) {
+    if (!evaluated) {
+        evaluate(state);
+    }
+    return expValue;
+}
+
+ExpString Expression::getString(AsmState &state) {
+    if (!evaluated) {
+        evaluate(state);
+    }
+    return expString;
+}
+
 #pragma clang diagnostic pop
 
 
@@ -627,7 +647,7 @@ static char evalCbmCodes(pair<regex, char> *codes, string &str, string::iterator
 }
 #pragma clang diagnostic pop
 
-static string evalAsciiString(int column, int line_number, string &str, string::iterator &pos) {
+static string evalAsciiString(Location loc, string &line_text, string &str, string::iterator &pos) {
     static auto octal_regx = regex("^[0-7]{3}");
     static auto hex_regx = regex("^[0-9a-fA-F]{2}");
 
@@ -638,9 +658,9 @@ static string evalAsciiString(int column, int line_number, string &str, string::
     while (pos != end_pos) {
         if (*pos == '\'') {
             pos++;
-            int col = column + static_cast<int>(pos - str.begin());
+            loc.column += static_cast<int>(pos - str.begin());
             if (pos == end_pos) {
-                throw CasmErrorException("String hsa dangling '\\' character.", line_number, col);
+                throw CasmErrorException("String hsa dangling '\\' character.", loc, line_text);
             }
             string sub_str = str.substr(pos - str.begin());
             switch (*pos) {
@@ -682,7 +702,7 @@ static string evalAsciiString(int column, int line_number, string &str, string::
                 case '2':
                 case '3':
                     if (not regex_search(sub_str, results, octal_regx)) {
-                        throw CasmErrorException("Bad octal string escape.", line_number, col);
+                        throw CasmErrorException("Bad octal string escape.", loc, line_text);
                     }
                     out_str += static_cast<char>(stoi(results.str(), nullptr, 8));
                     pos += 2;
@@ -690,13 +710,13 @@ static string evalAsciiString(int column, int line_number, string &str, string::
                 case 'x':
                 case 'X':
                     if (not regex_search(sub_str, results, hex_regx)) {
-                        throw CasmErrorException("Bad octal string escape.", line_number, col);
+                        throw CasmErrorException("Bad octal string escape.", loc, line_text);
                     }
                     out_str += static_cast<char>(stoi(results.str(), nullptr, 16));
                     pos += 2;
                     break;
                 default:
-                    throw CasmErrorException("Unknown ASCII escape sequence.", line_number, col);
+                    throw CasmErrorException("Unknown ASCII escape sequence.", loc, line_text);
             }
         }
         else {
@@ -707,7 +727,7 @@ static string evalAsciiString(int column, int line_number, string &str, string::
     return out_str;
 }
 
-static string evalCbmString(int column, int line_number, string &str, string::iterator &pos) {
+static string evalCbmString(Location loc, string &line_text, string &str, string::iterator &pos) {
     string result_str;
 
     while (pos != str.end() - 1) {
@@ -729,9 +749,9 @@ static string evalCbmString(int column, int line_number, string &str, string::it
                 result_str += ch;
             }
             else {
-                int col = column + static_cast<int>(pos - str.begin());
+                loc.column += static_cast<int>(pos - str.begin());
                 throw CasmErrorException("Dangling '\\' escape character at end of string.",
-                                         line_number, col);
+                                         loc, line_text);
             }
         }
         else {
@@ -741,8 +761,8 @@ static string evalCbmString(int column, int line_number, string &str, string::it
                 ch = evalCbmCodes(getControlCodesList(), str, pos);
             }
             if (ch == static_cast<char>(0xFF)) {
-                int col = column + static_cast<int>(pos - str.begin());
-                throw CasmErrorException("Unknown CBM code.", line_number, col);
+                loc.column += static_cast<int>(pos - str.begin());
+                throw CasmErrorException("Unknown CBM code.", loc, line_text);
             }
             result_str += ch;
         }
@@ -750,7 +770,7 @@ static string evalCbmString(int column, int line_number, string &str, string::it
     return result_str;
 }
 
-static string evalScreenString(int column, int line_number, string &str, string::iterator &pos) {
+static string evalScreenString(Location loc, string &line_text, string &str, string::iterator &pos) {
     string result_str;
 
     unsigned char ch;
@@ -762,8 +782,8 @@ static string evalScreenString(int column, int line_number, string &str, string:
         else {
             ch = evalCbmCodes(getCharCodesList(), str, pos);
             if (ch == 0xFF) {
-                int col = column + static_cast<int>(pos - str.begin());
-                throw CasmErrorException("Unknown CBM code for screen codes.", line_number, col);
+                loc.column += static_cast<int>(pos - str.begin());
+                throw CasmErrorException("Unknown CBM code for screen codes.", loc, line_text);
             }
         }
         if ((ch >= 0x40 && ch <= 0x5F) || (ch >= 0xA0 && ch <= 0xBF)) {
@@ -785,7 +805,7 @@ static string evalScreenString(int column, int line_number, string &str, string:
 
 
 
-static void evaluateString(ExpressionItem &exp_item) {
+static void evaluateString(ExpressionItem &exp_item, string &line_text) {
     string treeString = exp_item.stringValue;
 
     enum class StringType {ascii, petscii, screen};
@@ -820,13 +840,13 @@ static void evaluateString(ExpressionItem &exp_item) {
 
     switch (str_type) {
         case StringType::ascii:
-            result_str = evalAsciiString(exp_item.column, exp_item.lineNumber, treeString, it);
+            result_str = evalAsciiString(exp_item.loc, line_text, treeString, it);
             break;
         case StringType::petscii:
-            result_str = evalCbmString(exp_item.column, exp_item.lineNumber, treeString, it);
+            result_str = evalCbmString(exp_item.loc, line_text, treeString, it);
             break;
         case StringType::screen:
-            result_str = evalScreenString(exp_item.column, exp_item.lineNumber, treeString, it);
+            result_str = evalScreenString(exp_item.loc, line_text, treeString, it);
             break;
     }
 

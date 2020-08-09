@@ -7,16 +7,18 @@
 
 #include "Instruction.h"
 
+enum class AlignType;
 
 class PseudoOp : public Instruction {
-    int pseudoOp;
+    int pseudoOp = 0;
+    AlignType alignType;
 
 public:
-    explicit PseudoOp(int pseudo_op) : pseudoOp(pseudo_op) {};
-    int getSize(Line &Line, AsmState &state) override;
     void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
     static void createInstruction(node &pseudo_node, Line &asm_line);
 
+    void pass1(Line &asm_line, AsmState &state) override;
+    bool processFlags(AsmState& state) const;
 };
 
 

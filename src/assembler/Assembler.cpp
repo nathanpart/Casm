@@ -92,8 +92,8 @@ void Assembler::pre_process(ifstream &source_stream, const string& name) {
 }
 
 void Assembler::pass1() {
-    for (auto &line: lines) {
-
+    for (auto &current_line: lines) {
+        state->pass1(current_line);
     }
 }
 

@@ -9,9 +9,8 @@
 #include "Instruction.h"
 
 class Variable : public Instruction {
-    int getSize(Line &Line, AsmState &state) override;
-
-    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 

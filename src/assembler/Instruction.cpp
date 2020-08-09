@@ -31,108 +31,89 @@
 
 using namespace std;
 
-void Instruction::createInstruction(node &inst_node, Line &curLine) {
+void Instruction::createInstruction(node &inst_node, Line &asm_line) {
     node &child = inst_node.child.front();
     Expression expression;
     switch (inst_node.type) {
         case op_code:
-            curLine.lineType = LineTypes::cpu;
+            asm_line.lineType = LineTypes::cpu;
             switch (child.type) {
                 case GROUP1_INST:
-                    Group1::createInstruction(child, curLine);
+                    Group1::createInstruction(child, asm_line);
                     break;
                 case GROUP2_INST:
-                    Group2::createInstruction(child, curLine);
+                    Group2::createInstruction(child, asm_line);
                     break;
                 case GROUP3_INST:
-                    Group3::createInstruction(child, curLine);
+                    Group3::createInstruction(child, asm_line);
                     break;
                 case GROUP4_INST:
-                    Group4::createInstruction(child, curLine);
+                    Group4::createInstruction(child, asm_line);
                     break;
                 case GROUP5_INST:
-                    Group5::createInstruction(child, curLine);
+                    Group5::createInstruction(child, asm_line);
                     break;
                 case GROUP6_INST:
-                    Group6::createInstruction(child, curLine);
+                    Group6::createInstruction(child, asm_line);
                     break;
                 case GROUP7_INST:
-                    Group7::createInstruction(child, curLine);
+                    Group7::createInstruction(child, asm_line);
                     break;
                 case GROUP8_INST:
-                    Group8::createInstruction(child, curLine);
+                    Group8::createInstruction(child, asm_line);
                     break;
                 case GROUP9_INST:
-                    Group9::createInstruction(child, curLine);
+                    Group9::createInstruction(child, asm_line);
                     break;
                 case GROUP10_INST:
-                    Group10::createInstruction(child, curLine);
+                    Group10::createInstruction(child, asm_line);
                     break;
                 case GROUP11_INST:
-                    Group11::createInstruction(child, curLine);
+                    Group11::createInstruction(child, asm_line);
                     break;
                 case GROUP12_INST:
-                    Group12::createInstruction(child, curLine);
+                    Group12::createInstruction(child, asm_line);
                     break;
                 case GROUP13_INST:
-                    Group13::createInstruction(child, curLine);
+                    Group13::createInstruction(child, asm_line);
                     break;
                 case GROUP14_INST:
-                    Group14::createInstruction(child, curLine);
+                    Group14::createInstruction(child, asm_line);
                     break;
                 case GROUP15_INST:
-                    Group15::createInstruction(child, curLine);
+                    Group15::createInstruction(child, asm_line);
                     break;
                 case GROUP16_INST:
-                    Group16::createInstruction(child, curLine);
+                    Group16::createInstruction(child, asm_line);
                     break;
             }
             break;
 
         case pseudo_op:
-            curLine.lineType = LineTypes::pseudo_op;
-            PseudoOp::createInstruction(inst_node, curLine);
+            asm_line.lineType = LineTypes::pseudo_op;
+            PseudoOp::createInstruction(inst_node, asm_line);
             break;
 
         case variable:
-            curLine.lineType = LineTypes::variable;
-            curLine.instruction = unique_ptr<Instruction>(new Variable);
+            asm_line.lineType = LineTypes::variable;
+            asm_line.instruction = unique_ptr<Instruction>(new Variable);
             expression.buildRpnList(inst_node.child.back());
-            curLine.expressionList.push_back(expression);
+            asm_line.expressionList.push_back(expression);
             break;
 
         case region:
-            curLine.lineType = LineTypes::segment;
-            for (const auto &region_node: inst_node.child) {
-                switch (region_node.type) {
-                    case PARA:
-                        curLine.hasPara = true;
-                        break;
-                    case PAGE:
-                        curLine.hasPage = true;
-                        break;
-                    case exp:
-                        expression.buildRpnList(region_node);
-                        curLine.expressionList.push_back(expression);
-                        break;
-                    case SEGMENT:
-                        curLine.instruction = unique_ptr<Instruction>(new Region(false));
-                        break;
-                    case ENDS:
-                        curLine.instruction = unique_ptr<Instruction>(new Region(true));
-                        break;
-                }
-            }
+            asm_line.lineType = LineTypes::segment;
+            Region::createInstruction(inst_node, asm_line);
             break;
 
         case macro:
-            curLine.lineType = LineTypes::macro;
-            MacroLine::createInstruction(inst_node, curLine);
+            asm_line.lineType = LineTypes::macro;
+            MacroLine::createInstruction(inst_node, asm_line);
             break;
 
         case include:
-            curLine.lineType = LineTypes::include;
-            IncludeLine::createInstruction(inst_node, curLine);
+            asm_line.lineType = LineTypes::include;
+            IncludeLine::createInstruction(inst_node, asm_line);
             break;
 
     }

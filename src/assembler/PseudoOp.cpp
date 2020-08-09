@@ -6,16 +6,20 @@
 #include "PseudoOp.h"
 #include "../Parser/token.h"
 #include "../Parser/graminit.h"
+#include "Segment.h"
+#include "Error.h"
+
 
 using namespace std;
 
-static void addExpr(node &n, Line &asm_line) {
+static void addExpr(const node &n, Line &asm_line, bool is_child = true) {
     Expression expression;
-    expression.buildRpnList(n.child.back());
-    asm_line.expressionList.push_back(expression);
+    expression.buildRpnList(is_child ? n.child.back() : n, asm_line.lineText);
+    asm_line.expressionList.push_back({n.get_location(), expression});
 }
 
 void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
+    auto *op = new PseudoOp();
     switch (pseudo_node.type) {
         case CPU6502:
         case CPU65C02:
@@ -27,7 +31,7 @@ void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
         case END_BLOCK:
         case ELSE:
         case ENDIF:
-            asm_line.instruction = unique_ptr<Instruction>(new PseudoOp(pseudo_node.type));
+            op->pseudoOp = pseudo_node.type;
             break;
         case define_byte:
         case define_word:
@@ -38,46 +42,123 @@ void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
                     case DW:
                     case DBW:
                     case DA:
-                        asm_line.instruction = unique_ptr<Instruction>(new PseudoOp(def_node.type));
+                        op->pseudoOp = def_node.type;
                         break;
                     case exp:
-                        expression = make_unique<Expression>();
-                        expression->buildRpnList(def_node);
-                        asm_line.expressionList.push_back(*expression);
+                        addExpr(def_node, asm_line, false);
                         break;
                 }
             }
             break;
         case define_storage:
-            asm_line.instruction = unique_ptr<Instruction>(new PseudoOp(DS));
+            op->pseudoOp = DS;
             addExpr(pseudo_node, asm_line);
             break;
         case ::align:
-            asm_line.instruction = unique_ptr<Instruction>(new PseudoOp(ALIGN));
-            asm_line.hasPage = pseudo_node.child.back().type == PAGE;
-            asm_line.hasPara = pseudo_node.child.back().type == PARA;
+            op->pseudoOp = ALIGN;
+            switch (pseudo_node.child.back().type) {
+                case BYTE:
+                    op->alignType = AlignType::byte;
+                    break;
+                case WORD:
+                    op->alignType = AlignType::word;
+                    break;
+                case DWORD:
+                    op->alignType = AlignType::dword;
+                    break;
+                case PARA:
+                    op->alignType = AlignType::para;
+                    break;
+                case PAGE:
+                    op->alignType = AlignType::page;
+                    break;
+            }
             break;
         case block:
-            asm_line.instruction = unique_ptr<Instruction>(new PseudoOp(BLOCK));
+            op->pseudoOp = BLOCK;
             addExpr(pseudo_node, asm_line);
             break;
         case if_def:
-            asm_line.instruction = unique_ptr<Instruction>(new PseudoOp(pseudo_node.child.front().type));
+            op->pseudoOp = pseudo_node.child.front().type;
             addExpr(pseudo_node, asm_line);
             break;
         case iff:
-            asm_line.instruction = unique_ptr<Instruction>(new PseudoOp(IF));
+            op->pseudoOp = IF;
             addExpr(pseudo_node, asm_line);
             break;
     }
+    asm_line.instruction = unique_ptr<Instruction>(op);
 }
 
-
-
-int PseudoOp::getSize(Line &Line, AsmState &state) {
-    return 0;
-}
 
 void PseudoOp::getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {
 
+}
+
+
+void PseudoOp::pass1(Line &asm_line, AsmState &state) {
+    ExpValue value_opt;
+    if (processFlags(state)) { return; }
+    switch (pseudoOp) {
+        case ALIGN:
+            if (!state.inSegment()) {
+                throw CasmErrorException("Not in a segment.", asm_line.instructionLoc, asm_line.lineText);
+            }
+            state.doAlignment(alignType, asm_line.instructionLoc);
+            break;
+        case BLOCK:
+            value_opt = asm_line.expressionList.front().exp.getValue(state);
+            if (!value_opt) {
+                throw CasmErrorException("Block's destination address not known on pass 1.",
+                                         asm_line.expressionList.front().loc, asm_line.lineText);
+            }
+            if (value_opt->type != ValueType::absolute || value_opt->external) {
+                throw CasmErrorException("Block's target expression cannot be external or relocatable.",
+                                         asm_line.expressionList.front().loc, asm_line.lineText);
+            }
+            if (state.inBlock()) {
+                throw CasmErrorException("Blocks cannot be nested.",
+                                         asm_line.instructionLoc, asm_line.lineText);
+            }
+            state.enterBlock(value_opt->value);
+            break;
+        case END_BLOCK:
+            if (!state.inBlock()) {
+                throw CasmErrorException("Not currently in a BLOCK.",
+                                         asm_line.instructionLoc, asm_line.lineText);
+            }
+            state.endBlock();
+            break;
+    }
+    Instruction::pass1(asm_line, state);
+}
+
+
+bool PseudoOp::processFlags(AsmState &state) const {
+    switch (pseudoOp) {
+        case CPU6502:
+            state.cpuType = CpuType::CPU_6502;
+            break;
+        case CPU65C02:
+            state.cpuType = CpuType::CPU_65C02;
+            break;
+        case CPU65C816:
+            state.cpuType = CpuType::CPU_65C816;
+            break;
+        case WIDEA:
+            state.isAccumWide = true;
+            break;
+        case SHORTA:
+            state.isAccumWide = false;
+            break;
+        case WIDEXY:
+            state.isIndexWide = true;
+            break;
+        case SHORTXY:
+            state.isIndexWide = false;
+            break;
+        default:
+            return true;
+    }
+    return false;
 }

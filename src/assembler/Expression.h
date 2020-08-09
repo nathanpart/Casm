@@ -8,6 +8,9 @@
 #include <variant>
 #include <string>
 #include <vector>
+#include <optional>
+
+#include "Location.h"
 #include "../Parser/node.h"
 
 enum class ValueType {absolute, relocatable, relocatable_high, relocatable_low, segment, big, unknown};
@@ -41,23 +44,34 @@ struct ExpressionItem {
     OpType opType;
     Value value;
     std::string stringValue;
-    int lineNumber;
-    int column;
+    Location loc;
     [[nodiscard]] bool isRelocatable() const { return value.isRelocatable(); }
     [[nodiscard]] bool isRelocatableByte() const { return value.isRelocatableByte(); }
     [[nodiscard]] bool isAbsRelocatable() const { return isRelocatable() && !isRelocatableByte(); }
     [[nodiscard]] bool isInternalAbsRel() const { return isAbsRelocatable() && !value.external; }
 };
 
+using ExpValue = std::optional<Value>;
+using ExpString = std::optional<std::string>;
 
 class Expression {
+    std::string lineText;
     std::vector<ExpressionItem> rpnList;
-    bool symbolsResolved = true;
+    bool evaluated = false;
+    ExpValue expValue;
+    ExpString expString;
 
     void evalTreeLevel(const node& expr_tree);
+    void validateChar(ExpressionItem &item);
+    static void popBinaryArgs(std::stack<ExpressionItem> &exp_stack, ExpressionItem &lhs, ExpressionItem &rhs);
+    static void popUniArg(std::stack<ExpressionItem> &exp_stack, ExpressionItem &arg);
+    void validateArguments(ExpressionItem &lhs, ExpressionItem& rhs, OpType opType);
+    void popArgValidate(std::stack<ExpressionItem> &stack, ExpressionItem &lhs);
 public:
-    [[maybe_unused]] void buildRpnList(const node& expr_tree);
-    std::variant<Value, std::string> evaluate(AsmState &state);
+    [[maybe_unused]] void buildRpnList(const node& expr_tree, std::string &line_text);
+    void evaluate(AsmState &state);
+    ExpValue getValue(AsmState &state);
+    ExpString getString(AsmState &state);
 };
 
 

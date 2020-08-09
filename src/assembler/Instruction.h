@@ -18,8 +18,9 @@ class Instruction {
 public:
     virtual int getSize(Line &Line, AsmState &state) { return 0; }
     virtual void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {}
+    virtual void pass1(Line &asm_line, AsmState &state) {}
 
-    static void createInstruction(node &inst_node, Line &line);
+    static void createInstruction(node &inst_node, Line &asm_line);
 };
 
 
