@@ -20,6 +20,7 @@ public:
 
     void pass1(Line &asm_line, AsmState &state) override;
     bool processFlags(AsmState& state) const;
+    bool processConditionals(Line &asm_line, AsmState &state);
 };
 
 

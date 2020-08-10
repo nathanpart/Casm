@@ -115,7 +115,10 @@ void PseudoOp::pass1(Line &asm_line, AsmState &state) {
     int pseudo_op_size = 0;
     ExpValue value_opt;
     Location loc;
-    bool symbolDefined;
+    if (processConditionals(asm_line, state))
+        return;
+    if (!state.getActiveFlag())
+        return;
     if (processFlags(state)) {
         state.defineLabel();
         return;
@@ -183,32 +186,6 @@ void PseudoOp::pass1(Line &asm_line, AsmState &state) {
             state.defineLabel();
             state.allocateSpace(value_opt->value);
             break;
-        case IFDEF:
-            if (state.getActiveFlag())
-                state.startConditionalBlock(state.hasSymbol(condSymbol));
-            else
-                state.startConditionalBlock(false);
-            break;
-        case IFNDEF:
-            if (state.getActiveFlag())
-                state.startConditionalBlock(!state.hasSymbol(condSymbol));
-            else
-                state.startConditionalBlock(false);
-            break;
-        case IF:
-            if (state.getActiveFlag()) {
-                value_opt = asm_line.expressionList.front().exp.getValue(state);
-                state.startConditionalBlock(value_opt && !value_opt->external && value_opt->value != 0);
-            }
-            else
-                state.startConditionalBlock(false);
-            break;
-        case ELSE:
-            state.flipConditionalState();
-            break;
-        case ENDIF:
-            state.endConditionalBlock();
-            break;
     }
 }
 
@@ -235,6 +212,40 @@ bool PseudoOp::processFlags(AsmState &state) const {
             break;
         case SHORTXY:
             state.isIndexWide = false;
+            break;
+        default:
+            return true;
+    }
+    return false;
+}
+
+bool PseudoOp::processConditionals(Line &asm_line, AsmState &state) {
+    switch (pseudoOp) {
+        case IFDEF:
+            if (state.getActiveFlag())
+                state.startConditionalBlock(state.hasSymbol(condSymbol));
+            else
+                state.startConditionalBlock(false);
+            break;
+        case IFNDEF:
+            if (state.getActiveFlag())
+                state.startConditionalBlock(!state.hasSymbol(condSymbol));
+            else
+                state.startConditionalBlock(false);
+            break;
+        case IF:
+            if (state.getActiveFlag()) {
+                auto value_opt = asm_line.expressionList.front().exp.getValue(state);
+                state.startConditionalBlock(value_opt && !value_opt->external && value_opt->value != 0);
+            }
+            else
+                state.startConditionalBlock(false);
+            break;
+        case ELSE:
+            state.flipConditionalState();
+            break;
+        case ENDIF:
+            state.endConditionalBlock();
             break;
         default:
             return true;

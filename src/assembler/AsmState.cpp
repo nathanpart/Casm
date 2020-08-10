@@ -95,7 +95,17 @@ int AsmState::getCurrentOffset(Location &loc) {
 void AsmState::pass1(Line &line) {
     globalLine++;
     currentLine = &line;
+
     if (isActive) {
+        if (line.instruction == nullptr && !currentLine->label.empty()) {
+            if (currentSegment != nullptr) {
+                defineLabel();
+            }
+            else {
+                throw CasmErrorException("Not currently in a segment.",
+                                         currentLine->labelLoc, currentLine->lineText);
+            }
+        }
         line.instruction->pass1(line, *this);
     }
     else {
