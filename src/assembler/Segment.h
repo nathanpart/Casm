@@ -70,13 +70,18 @@ public:
                       Location &loc, AsmState &state);
     bool hasSymbol(const std::string& sym_name);
     [[nodiscard]] int getOffset() const {
-        return currentOffset;
+        if (currentSection->isBlock) {
+            return currentOffset + currentSection->startAddress;
+        }
+        return isAbsolute ? currentOffset + baseAddress : currentOffset;
     }
     void enterSection(AlignType section_alignment, const Location &loc, const std::string &line);
     void endSegment() { currentSection->size = currentOffset - currentSection->startAddress; }
     void assignSymbol(std::string &symbol_name, AsmState &state);
     void enterBlock(int block_address);
     bool inBlock() { return currentSection->isBlock; }
+    void defineLabel(std::string &label_name, AsmState &state);
+    void allocateSpace(int size, AsmState &state);
 };
 
 

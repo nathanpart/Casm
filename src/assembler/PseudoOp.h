@@ -12,6 +12,7 @@ enum class AlignType;
 class PseudoOp : public Instruction {
     int pseudoOp = 0;
     AlignType alignType;
+    std::string condSymbol;
 
 public:
     void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;

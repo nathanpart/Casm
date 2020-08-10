@@ -14,9 +14,10 @@
 using namespace std;
 
 bool Segment::resolveSymbol(std::string symbol_name, Value &value, AsmState &state) {
+    bool is_absolute;
     if (symbol_name.back() == ':') {
-        if (labelTable.findLocal(name, getOffset(), value.value)) {
-            value.type = ValueType::relocatable;
+        if (labelTable.findLocal(name, getOffset(), value.value, is_absolute)) {
+            value.type = is_absolute ? ValueType::absolute : ValueType::relocatable;
             value.external = false;
             return true;
         }
@@ -33,8 +34,8 @@ bool Segment::resolveSymbol(std::string symbol_name, Value &value, AsmState &sta
             return false;
         }
     }
-    if (labelTable.findLabel(symbol_name, value.value)) {
-        value.type = ValueType::relocatable;
+    if (labelTable.findLabel(symbol_name, value.value, is_absolute)) {
+        value.type = is_absolute ? ValueType::absolute : ValueType::relocatable;
         value.external = false;
         return true;
     }
@@ -71,7 +72,13 @@ void Segment::importSymbol(const std::string& local_name, std::string symbol_nam
 }
 
 bool Segment::hasSymbol(const std::string& sym_name) {
-    return labelTable.hasLabel(sym_name) || (symbols.count(sym_name) == 1) || (importRefs.count(sym_name) == 1);
+    if (sym_name.back() == ':') {
+        return labelTable.hasLocal(sym_name, currentOffset);
+    }
+    if (sym_name.back() == '&') {
+        return variables.count(sym_name) > 0;
+    }
+    return labelTable.hasLabel(sym_name) || (symbols.count(sym_name) > 0) || (importRefs.count(sym_name) > 0);
 }
 
 void Segment::enterSection(AlignType section_alignment, const Location &loc, const string &line) {
@@ -126,13 +133,14 @@ void Segment::enterSection(AlignType section_alignment, const Location &loc, con
     }
     section.push_back({static_cast<int>(start_offset), section_alignment, nullptr, 0, false});
     currentSection = &section.back();
+    currentOffset = static_cast<int>(start_offset);
 }
 
 
 
 void Segment::assignSymbol(string &symbol_name, AsmState &state) {
     if (labelTable.hasLabel(symbol_name) || symbols.count(symbol_name) > 0 ||
-        variables.count(symbol_name) > 0 || imports.count(name) > 0) {
+        imports.count(symbol_name) > 0) {
         throw CasmErrorException("Segment already has a symbol by this name defined.",
                                  state.currentLine->labelLoc, state.currentLine->lineText);
     }
@@ -142,4 +150,36 @@ void Segment::assignSymbol(string &symbol_name, AsmState &state) {
 void Segment::enterBlock(int block_address) {
     section.push_back({block_address, AlignType::byte, nullptr, 0, true});
     currentSection = &section.back();
+    currentOffset = block_address;
+}
+
+void Segment::defineLabel(string &label_name, AsmState &state) {
+    auto asm_line = state.currentLine;
+    bool var_abs = isAbsolute || currentSection->isBlock;
+    if (asm_line->isLocalLabel()) {
+        if (labelTable.hasLocal(label_name, currentOffset)) {
+            throw CasmErrorException("Local label already exists.", asm_line->labelLoc, asm_line->lineText);
+        }
+        labelTable.addLabel(label_name, true, currentOffset, var_abs);
+    }
+    else if (asm_line->isVariable()) {
+            Value sym_value = {currentOffset, var_abs ? ValueType::absolute : ValueType::relocatable};
+            variables[name] = {label_name, sym_value};
+    }
+    else {
+        if (labelTable.hasLabel(label_name) || symbols.count(label_name) > 0 ||
+            imports.count(label_name) > 0) {
+            throw CasmErrorException("Segment already has a symbol by this name defined.",
+                                     state.currentLine->labelLoc, state.currentLine->lineText);
+        }
+        labelTable.addLabel(label_name, false, currentOffset, var_abs);
+    }
+}
+
+void Segment::allocateSpace(int size, AsmState &state) {
+    if (currentOffset + size > 0xFFFF) {
+        throw CasmErrorException("Segment wrap around.",
+                                 state.currentLine->labelLoc, state.currentLine->lineText);
+    }
+    currentOffset += size;
 }

@@ -93,9 +93,15 @@ int AsmState::getCurrentOffset(Location &loc) {
 }
 
 void AsmState::pass1(Line &line) {
+    globalLine++;
     currentLine = &line;
-    if (line.lineType == LineTypes::segment || line.lineType == LineTypes::variable) {
+    if (isActive) {
         line.instruction->pass1(line, *this);
+    }
+    else {
+        if (line.lineType == LineTypes::pseudo_op) {
+            line.instruction->pass1(line, *this);
+        }
     }
 }
 
@@ -146,3 +152,92 @@ void AsmState::endBlock() {
     currentSegment->enterSection(AlignType::byte,
                                  currentLine->instructionLoc, currentLine->lineText);
 }
+
+void AsmState::defineLabel() {
+    if (!currentLine->label.empty()) {
+        if (currentSegment == nullptr) {
+            throw CasmErrorException("Not currently in a segment.",
+                                     currentLine->labelLoc, currentLine->lineText);
+        }
+        currentSegment->defineLabel(currentLine->label, *this);
+    }
+}
+
+void AsmState::allocateSpace(int size) {
+    if (currentSegment == nullptr) {
+        throw CasmErrorException("Not currently in a segment.",
+                                 currentLine->labelLoc, currentLine->lineText);
+    }
+    currentSegment->allocateSpace(size, *this);
+}
+
+void AsmState::startConditionalBlock(bool state) {
+    auto level = conditions.empty() ? 0 : conditions.size() - 1;
+    CondItem item = {isActive, globalLine, state, level, false};
+    conditions.push_back(item);
+    isActive = isActive ? state : isActive;
+    if (condition_starts.count(globalLine) > 0) {
+        auto saved_item = condition_starts[globalLine];
+        if (saved_item.isActive != item.isActive || saved_item.lineNumber != item.lineNumber ||
+            saved_item.condition != item.condition || saved_item.level != item.level) {
+            throw CasmErrorException("Phase error.", currentLine->labelLoc, currentLine->lineText);
+        }
+    }
+    else {
+        condition_starts[globalLine] = item;
+    }
+}
+
+void AsmState::flipConditionalState() {
+    auto &flip_item = conditions.back();
+    if (flip_item.isActive) {
+        if (flip_item.hasElse) {
+            throw CasmErrorException("Conditional already has an else.",
+                                     currentLine->labelLoc, currentLine->lineText);
+        }
+        isActive = !isActive;
+        flip_item.hasElse = true;
+    }
+}
+
+void AsmState::endConditionalBlock() {
+    auto end_item = conditions.back();
+    if (end_item.isActive) {
+        isActive = true;
+    }
+    conditions.pop_back();
+}
+
+bool AsmState::hasSymbol(const string& symbol_name) {
+    auto dot_loc = symbol_name.find('.');
+    if (dot_loc == string::npos && currentSegment != nullptr) {
+        return currentSegment->hasSymbol(symbol_name);
+    }
+    if (symbol_name.back() == ':' || symbol_name.back() == '&') {
+        throw CasmErrorException("Locals and variables referenced outside of a segment.",
+                                 currentLine->instructionLoc, currentLine->lineText);
+    }
+    string seg_name;
+    string offset_name;
+    if (dot_loc == 0 || dot_loc == string::npos) {
+        offset_name = (dot_loc == 0) ? symbol_name.substr(1) : symbol_name;
+    }
+    else {
+        seg_name = symbol_name.substr(0, dot_loc);
+        if (dot_loc + 1 < symbol_name.length()) {
+            offset_name = symbol_name.substr(dot_loc + 1);
+        }
+    }
+    if (!seg_name.empty()) {
+        if (segments.count(seg_name) == 0) {
+            return false;
+        }
+        if (!offset_name.empty()) {
+            return segments[seg_name].hasSymbol(offset_name);
+        }
+        return true;
+    }
+    return globals.count(offset_name);
+}
+
+

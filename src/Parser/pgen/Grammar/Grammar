@@ -63,7 +63,7 @@ define_storage: DS exp
 align: ALIGN (BYTE | WORD | DWORD | PARA | PAGE)
 block: BLOCK exp
 
-if_def: (IFDEF | IFNDEF) exp
+if_def: (IFDEF | IFNDEF) symbol
 iff: IF exp
 
 

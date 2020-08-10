@@ -15,9 +15,9 @@ class Labels {
 
     std::pair<std::vector<Label>::iterator, std::vector<Label>::iterator> findLocalRange(int refAdr);
 public:
-    bool addLabel(const std::string& name, bool local, int location);
-    bool findLocal(const std::string& name, int refAddress, int &address);
-    bool findLabel(const std::string& name, int &address);
+    bool addLabel(const std::string& name, bool local, int location, bool is_absolute);
+    bool findLocal(const std::string& name, int refAddress, int &address, bool &is_absolute);
+    bool findLabel(const std::string& name, int &address, bool &is_absolute);
     bool hasLocal(const std::string& name, int refAddress);
     bool hasLabel(const std::string& name);
 };
@@ -26,6 +26,7 @@ struct Label {
     std::string name;
     bool isLocal;
     int address;
+    bool isAbsolute;
 };
 
 #endif //CASM_LABEL_H

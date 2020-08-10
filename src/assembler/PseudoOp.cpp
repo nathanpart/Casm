@@ -80,7 +80,22 @@ void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
             break;
         case if_def:
             op->pseudoOp = pseudo_node.child.front().type;
-            addExpr(pseudo_node, asm_line);
+            for (const auto& symbol_node: pseudo_node.child.back().child) {
+               switch (symbol_node.type) {
+                   case NAME:
+                       op->condSymbol += symbol_node.str;
+                       break;
+                   case COLON:
+                       op->condSymbol += ':';
+                       break;
+                   case AMPER:
+                       op->condSymbol += '&';
+                       break;
+                   case DOT:
+                       op->condSymbol += '.';
+                       break;
+               }
+            }
             break;
         case iff:
             op->pseudoOp = IF;
@@ -97,16 +112,24 @@ void PseudoOp::getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {
 
 
 void PseudoOp::pass1(Line &asm_line, AsmState &state) {
+    int pseudo_op_size = 0;
     ExpValue value_opt;
-    if (processFlags(state)) { return; }
+    Location loc;
+    bool symbolDefined;
+    if (processFlags(state)) {
+        state.defineLabel();
+        return;
+    }
     switch (pseudoOp) {
         case ALIGN:
+            state.defineLabel();
             if (!state.inSegment()) {
                 throw CasmErrorException("Not in a segment.", asm_line.instructionLoc, asm_line.lineText);
             }
             state.doAlignment(alignType, asm_line.instructionLoc);
             break;
         case BLOCK:
+            state.defineLabel();
             value_opt = asm_line.expressionList.front().exp.getValue(state);
             if (!value_opt) {
                 throw CasmErrorException("Block's destination address not known on pass 1.",
@@ -123,14 +146,70 @@ void PseudoOp::pass1(Line &asm_line, AsmState &state) {
             state.enterBlock(value_opt->value);
             break;
         case END_BLOCK:
+            state.defineLabel();
             if (!state.inBlock()) {
                 throw CasmErrorException("Not currently in a BLOCK.",
                                          asm_line.instructionLoc, asm_line.lineText);
             }
             state.endBlock();
             break;
+        case DB:
+            state.defineLabel();
+            for (auto &exp_item: asm_line.expressionList) {
+                auto string_opt = exp_item.exp.getString(state);
+                pseudo_op_size += string_opt ? static_cast<int>(string_opt->length()) : 1;
+            }
+            state.allocateSpace(pseudo_op_size);
+            break;
+        case DW:
+        case DBW:
+        case DA:
+            state.defineLabel();
+            state.allocateSpace(static_cast<int>(asm_line.expressionList.size()) * 2);
+            break;
+        case DS:
+            value_opt = asm_line.expressionList.front().exp.getValue(state);
+            loc = asm_line.expressionList.front().loc;
+            if (!value_opt) {
+                throw CasmErrorException("Unable to evaluate operand for DS on pass 1.",
+                                         loc, asm_line.lineText);
+            }
+            if (value_opt->type != ValueType::absolute || value_opt->external) {
+                throw CasmErrorException("Operand for DS cannot be a relocatable.", loc, asm_line.lineText);
+            }
+            if (value_opt->value < 0) {
+                throw CasmErrorException("operand for DS cannot be negative.", loc, asm_line.lineText);
+            }
+            state.defineLabel();
+            state.allocateSpace(value_opt->value);
+            break;
+        case IFDEF:
+            if (state.getActiveFlag())
+                state.startConditionalBlock(state.hasSymbol(condSymbol));
+            else
+                state.startConditionalBlock(false);
+            break;
+        case IFNDEF:
+            if (state.getActiveFlag())
+                state.startConditionalBlock(!state.hasSymbol(condSymbol));
+            else
+                state.startConditionalBlock(false);
+            break;
+        case IF:
+            if (state.getActiveFlag()) {
+                value_opt = asm_line.expressionList.front().exp.getValue(state);
+                state.startConditionalBlock(value_opt && !value_opt->external && value_opt->value != 0);
+            }
+            else
+                state.startConditionalBlock(false);
+            break;
+        case ELSE:
+            state.flipConditionalState();
+            break;
+        case ENDIF:
+            state.endConditionalBlock();
+            break;
     }
-    Instruction::pass1(asm_line, state);
 }
 
 

@@ -56,10 +56,7 @@ struct Line {
     bool isLocalLabel() { return !label.empty() && label.back() == ':'; }
     bool isVariable() { return !label.empty() && label.back() == '&'; }
     [[nodiscard]] bool hasLabel() const { return !label.empty(); }
-    bool normalLabel() { return !label.empty() && label.back() != ':' && label.back() != '&' };
-    }
-
-
+    bool normalLabel() { return !label.empty() && label.back() != ':' && label.back() != '&'; }
 };
 
 

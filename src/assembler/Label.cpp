@@ -7,18 +7,19 @@
 
 using namespace std;
 
-bool Labels::addLabel(const string& name, bool local, int location) {
+bool Labels::addLabel(const string& name, bool local, int location, bool is_absolute) {
     if (local ? hasLocal(name, location) : hasLabel(name))
         return false;
     Label label;
     label.address = location;
     label.isLocal = local;
     label.name = name;
+    label.isAbsolute = is_absolute;
     labels.push_back(label);
     return true;
 }
 
-bool Labels::findLocal(const string& name, int refAddress, int &address) {
+bool Labels::findLocal(const string& name, int refAddress, int &address, bool &is_absolute) {
     vector<Label>::iterator l_begin;
     vector<Label>::iterator l_end;
 
@@ -26,16 +27,18 @@ bool Labels::findLocal(const string& name, int refAddress, int &address) {
     for (auto it = l_begin; it != l_end; it++) {
         if (it->isLocal && it->name == name) {
             address = it->address;
+            is_absolute = it->isAbsolute;
             return true;
         }
     }
     return false;
 }
 
-bool Labels::findLabel(const string& name, int &address) {
+bool Labels::findLabel(const string& name, int &address, bool &is_absolute) {
     for (const auto& label: labels) {
         if ((!label.isLocal) && label.name == name) {
             address = label.address;
+            is_absolute = label.isAbsolute;
             return true;
         }
     }
@@ -44,12 +47,14 @@ bool Labels::findLabel(const string& name, int &address) {
 
 bool Labels::hasLocal(const string& name, int refAddress) {
     int x = 0;
-    return findLocal(name, refAddress, x);
+    bool f;
+    return findLocal(name, refAddress, x, f);
 }
 
 bool Labels::hasLabel(const string& name) {
     int x = 0;
-    return findLabel(name, x);
+    bool b;
+    return findLabel(name, x, b);
 }
 
 pair<vector<Label>::iterator, vector<Label>::iterator>
