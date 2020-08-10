@@ -18,7 +18,8 @@ class InstBit : public Group4 {
 };
 
 class InstLdy : public Group4 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 

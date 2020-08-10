@@ -42,12 +42,7 @@ struct Line {
     bool hasLong = false;
     bool hasDpZp = false;
 
-    bool hasPara = false;
-    bool hasPage = false;
-
-
     std::vector<ExpItem> expressionList;
-
 
     bool fromTree(node &tree);
 

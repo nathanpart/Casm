@@ -28,7 +28,8 @@ void Group11::createInstruction(node &group_node, Line &asm_line) {
                             asm_line.hasShort = true;
                             break;
                         case exp:
-                            expression.buildRpnList(imm_node);
+                            expression.buildRpnList(imm_node, asm_line.lineText);
+                            asm_line.expressionList.push_back({imm_node.location, expression});
                             break;
                         default:;  // Don't need to do anything with the hash
                     }
@@ -39,7 +40,8 @@ void Group11::createInstruction(node &group_node, Line &asm_line) {
                 asm_line.hasDpZp = true;
                 break;
             case exp:
-                expression.buildRpnList(child_node);
+                expression.buildRpnList(child_node, asm_line.lineText);
+                asm_line.expressionList.push_back({child_node.location, expression});
                 break;
             case y_index:
                 hasYIndex = true;
@@ -47,7 +49,6 @@ void Group11::createInstruction(node &group_node, Line &asm_line) {
 
         }
     }
-    asm_line.expressionList.push_back(expression);
     asm_line.instruction = unique_ptr<Instruction>(new Group11);
     if (asm_line.addressMode != AddressModes::imm) {
         if (asm_line.hasDpZp) {
@@ -57,4 +58,9 @@ void Group11::createInstruction(node &group_node, Line &asm_line) {
             asm_line.addressMode = hasYIndex ? AddressModes::abs_y: AddressModes::abs;
         }
     }
+}
+
+void Group11::pass1(Line &asm_line, AsmState &state) {
+    state.defineLabel();
+    state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, false));
 }

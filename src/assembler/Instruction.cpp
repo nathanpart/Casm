@@ -28,6 +28,7 @@
 #include "Region.h"
 #include "MacroLine.h"
 #include "IncludeLine.h"
+#include "AddressMode.h"
 
 using namespace std;
 
@@ -97,8 +98,8 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
         case variable:
             asm_line.lineType = LineTypes::variable;
             asm_line.instruction = unique_ptr<Instruction>(new Variable);
-            expression.buildRpnList(inst_node.child.back());
-            asm_line.expressionList.push_back(expression);
+            expression.buildRpnList(inst_node.child.back(), asm_line.lineText);
+            asm_line.expressionList.push_back({inst_node.child.back().location, expression});
             break;
 
         case region:
@@ -118,4 +119,11 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
 
     }
 
+}
+
+void Instruction::pass1(Line &asm_line, AsmState &state) {
+    if (asm_line.lineType == LineTypes::cpu) {
+        state.defineLabel();
+        state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, true) + 1);
+    }
 }

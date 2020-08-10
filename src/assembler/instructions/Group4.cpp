@@ -8,6 +8,7 @@
 #include "../../Parser/token.h"
 #include "../../Parser/graminit.h"
 #include "../Line.h"
+#include "../AddressMode.h"
 
 using namespace std;
 
@@ -28,7 +29,8 @@ void Group4::createInstruction(node &group_node, Line &asm_line) {
                             asm_line.hasShort = true;
                             break;
                         case exp:
-                            expression.buildRpnList(imm_node);
+                            expression.buildRpnList(imm_node, asm_line.lineText);
+                            asm_line.expressionList.push_back({imm_node.location, expression});
                             break;
                     }
                 }
@@ -41,7 +43,8 @@ void Group4::createInstruction(node &group_node, Line &asm_line) {
                 break;
 
             case exp:
-                expression.buildRpnList(child_node);
+                expression.buildRpnList(child_node, asm_line.lineText);
+                asm_line.expressionList.push_back({child_node.location, expression});
                 break;
 
             case x_index:
@@ -69,5 +72,9 @@ void Group4::createInstruction(node &group_node, Line &asm_line) {
             asm_line.addressMode = hasXIndex ? AddressModes::abs_x : AddressModes::abs;
         }
     }
-    asm_line.expressionList.push_back(expression);
+}
+
+void InstLdy::pass1(Line &asm_line, AsmState &state) {
+    state.defineLabel();
+    state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, false));
 }
