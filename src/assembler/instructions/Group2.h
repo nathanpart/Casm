@@ -18,11 +18,13 @@ class InstAsl : public Group2 {
 };
 
 class InstDec : public Group2 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstInc : public Group2 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstLsr : public Group2 {

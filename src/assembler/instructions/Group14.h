@@ -14,9 +14,7 @@ public:
     explicit Group14(int op_code) : opCode(op_code) {};
     static void createInstruction(node &group_node, Line &asm_line);
 
-    int getSize(Line &Line, AsmState &state) override {
-        return 1;
-    };
+    void pass1(Line &asm_line, AsmState &state) override;
 
     void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override {
         *ptr = opCode;

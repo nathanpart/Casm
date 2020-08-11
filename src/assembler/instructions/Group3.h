@@ -38,11 +38,13 @@ class InstBpl : public Group3 {
 };
 
 class InstBra : public Group3 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstBrl : public Group3 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstBvc : public Group3 {
@@ -54,23 +56,28 @@ class InstBvs : public Group3 {
 };
 
 class InstJsl : public Group3 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstPea : public Group3 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstPer : public Group3 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstTrb : public Group3 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 class InstTsb : public Group3 {
-
+public:
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 #endif //CASM_GROUP3_H

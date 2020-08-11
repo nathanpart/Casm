@@ -9,6 +9,8 @@
 #include "../../Parser/graminit.h"
 #include "../Line.h"
 
+#include "../Error.h"
+
 using namespace std;
 
 void Group3::createInstruction(node &group_node, Line &asm_line) {
@@ -24,8 +26,8 @@ void Group3::createInstruction(node &group_node, Line &asm_line) {
             case ZP:
                 asm_line.hasDpZp = true;
             case exp:
-                expression.buildRpnList(child_node);
-                asm_line.expressionList.push_back(expression);
+                expression.buildRpnList(child_node, asm_line.lineText);
+                asm_line.expressionList.push_back({child_node.location, expression});
                 break;
             case GROUP3_INST:
                 inst = child_node.str;
@@ -94,4 +96,62 @@ void Group3::createInstruction(node &group_node, Line &asm_line) {
                 }
         }
     }
+}
+
+void InstBra::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType == CpuType::CPU_6502) {
+        throw CasmErrorException("6502 does not have this instruction.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+}
+
+void InstBrl::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType != CpuType::CPU_65C816) {
+        throw CasmErrorException("Instruction requires a 65C816.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+}
+
+void InstPea::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType != CpuType::CPU_65C816) {
+        throw CasmErrorException("Instruction requires a 65C816.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+}
+
+void InstPer::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType != CpuType::CPU_65C816) {
+        throw CasmErrorException("Instruction requires a 65C816.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+
+}
+
+void InstTrb::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType == CpuType::CPU_6502) {
+        throw CasmErrorException("6502 does not have this instruction.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+}
+
+void InstTsb::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType == CpuType::CPU_6502) {
+        throw CasmErrorException("6502 does not have this instruction.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+}
+
+void InstJsl::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType != CpuType::CPU_65C816) {
+        throw CasmErrorException("Instruction requires a 65C816.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+
 }

@@ -16,7 +16,7 @@
 
 enum class AddressModes { imm, abs, abs_long, dp, dp_ind, dp_ind_long, abs_x, abs_y, abs_long_x, dp_x, dp_y,
         dp_ind_x, dp_ind_y, dp_ind_long_y, sr, sr_ind_y, acc, rel, rel_long, imp, long_ind, abs_ind, abs_ind_x,
-        block, unknown};
+        abs_ind_long, block, unknown};
 
 enum class LineTypes { cpu, pseudo_op, variable, segment, macro, include};
 

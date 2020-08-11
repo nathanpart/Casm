@@ -11,6 +11,8 @@
 class Group10 : public Instruction {
 public:
     static void createInstruction(node &group_node, Line &asm_line);
+
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
 

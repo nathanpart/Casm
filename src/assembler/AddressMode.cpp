@@ -2,10 +2,15 @@
 // Created by nathan on 7/22/20.
 //
 
+#include <set>
+
 #include "../Parser/graminit.h"
 #include "AddressMode.h"
 #include "../Parser/token.h"
+#include "Line.h"
 
+
+using namespace std;
 
 static bool findAtom(node *&cur_node) {
     if (cur_node->type == atom)
@@ -82,10 +87,50 @@ int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum) {
         case AddressModes::abs_ind:
         case AddressModes::abs_ind_x:
         case AddressModes::block:
+        case AddressModes::abs_ind_long:
             return 2;
 
         case AddressModes::abs_long:
         case AddressModes::abs_long_x:
             return 3;
     }
+}
+
+bool hasAddressMode(AsmState &state) {
+    static set<AddressModes> cpu65502Modes = {
+            AddressModes::imm, AddressModes::abs, AddressModes::dp, AddressModes::abs_x, AddressModes::abs_y,
+            AddressModes::dp_x, AddressModes::dp_y, AddressModes::dp_ind_x, AddressModes::dp_ind_y,
+            AddressModes::acc, AddressModes::rel, AddressModes::imp, AddressModes::abs_ind
+    };
+
+    static set<AddressModes> cpu65C02Modes = {
+            AddressModes::imm, AddressModes::abs, AddressModes::dp, AddressModes::abs_x, AddressModes::abs_y,
+            AddressModes::dp_x, AddressModes::dp_y, AddressModes::dp_ind_x, AddressModes::dp_ind_y,
+            AddressModes::acc, AddressModes::rel, AddressModes::imp, AddressModes::abs_ind, AddressModes::abs_ind_x,
+            AddressModes::dp_ind
+    };
+
+    static set<AddressModes> cpu65816Modes = {
+            AddressModes::imm, AddressModes::abs, AddressModes::dp, AddressModes::abs_x, AddressModes::abs_y,
+            AddressModes::dp_x, AddressModes::dp_y, AddressModes::dp_ind_x, AddressModes::dp_ind_y,
+            AddressModes::acc, AddressModes::rel, AddressModes::imp, AddressModes::abs_ind, AddressModes::abs_ind_x,
+            AddressModes::abs_ind_long, AddressModes::abs_long, AddressModes::abs_long_x, AddressModes::dp_ind,
+            AddressModes::dp_ind_long, AddressModes::dp_ind_long_y, AddressModes::rel_long, AddressModes::sr,
+            AddressModes::sr_ind_y, AddressModes::block
+    };
+
+    switch (state.cpuType) {
+        case CpuType::CPU_6502:
+            if (cpu65502Modes.count(state.currentLine->addressMode) == 0)
+                return false;
+            break;
+        case CpuType::CPU_65C02:
+            if (cpu65C02Modes.count(state.currentLine->addressMode) == 0)
+                return false;
+            break;
+        case CpuType::CPU_65C816:
+            if (cpu65816Modes.count(state.currentLine->addressMode) == 0)
+                return false;
+    }
+    return true;
 }

@@ -10,6 +10,8 @@
 #include "../Line.h"
 #include "../AddressMode.h"
 
+#include "../Error.h"
+
 using namespace std;
 
 void Group4::createInstruction(node &group_node, Line &asm_line) {
@@ -77,4 +79,14 @@ void Group4::createInstruction(node &group_node, Line &asm_line) {
 void InstLdy::pass1(Line &asm_line, AsmState &state) {
     state.defineLabel();
     state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, false));
+}
+
+void InstBit::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType == CpuType::CPU_6502 &&
+            (asm_line.addressMode == AddressModes::imm || asm_line.addressMode == AddressModes::abs_x ||
+             asm_line.addressMode == AddressModes::dp_x)) {
+        throw CasmErrorException("BIT does not support this address mode on a 6502.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
 }

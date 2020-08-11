@@ -13,15 +13,10 @@ class Group13 : public Instruction {
 
 public:
     static void createInstruction(node &group_node, Line &asm_line);
+
+    void pass1(Line &asm_line, AsmState &state) override;
 };
 
-class InstSty : public Group13 {
-
-};
-
-class InstStz : public Group13 {
-
-};
 
 
 #endif //CASM_GROUP13_H

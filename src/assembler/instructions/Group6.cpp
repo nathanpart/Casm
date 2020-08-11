@@ -8,6 +8,7 @@
 #include "../../Parser/token.h"
 #include "../../Parser/graminit.h"
 #include "../Line.h"
+#include "../Error.h"
 
 using namespace std;
 
@@ -27,7 +28,8 @@ void Group6::createInstruction(node &group_node, Line &asm_line) {
                             asm_line.hasShort = true;
                             break;
                         case exp:
-                            expression.buildRpnList(imm_node);
+                            expression.buildRpnList(imm_node, asm_line.lineText);
+                            asm_line.expressionList.push_back({imm_node.location, expression});
                             break;
                     }
                 }
@@ -46,7 +48,15 @@ void Group6::createInstruction(node &group_node, Line &asm_line) {
                     asm_line.instruction = unique_ptr<Instruction>(new InstSep());
                 }
         }
-        asm_line.expressionList.push_back(expression);
     }
 
+}
+
+void Group6::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType != CpuType::CPU_65C816) {
+        throw CasmErrorException("Instruction requires a 65C816.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+
+    Instruction::pass1(asm_line, state);
 }

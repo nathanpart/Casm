@@ -7,6 +7,7 @@
 #include "../../Parser/token.h"
 #include "../Line.h"
 #include "../AddressMode.h"
+#include "../Error.h"
 
 using namespace std;
 
@@ -35,7 +36,8 @@ void Group1::createInstruction(node &group_node, Line &asm_line) {
                             asm_line.hasShort = true;
                             break;
                         case exp:
-                            expression.buildRpnList(imm_node);
+                            expression.buildRpnList(imm_node, asm_line.lineText);
+                            asm_line.expressionList.push_back({imm_node.location, expression});
                             break;
                         default:;  // Don't need to do anything with the hash
                     }
@@ -50,7 +52,8 @@ void Group1::createInstruction(node &group_node, Line &asm_line) {
                 break;
             case exp:
                 isIndirect = isExpTreeIndirect(work_ptr, hasXIndirect, hasSIndirect);
-                expression.buildRpnList(*work_ptr);
+                expression.buildRpnList(*work_ptr, asm_line.lineText);
+                asm_line.expressionList.push_back({work_ptr->location, expression});
                 break;
             case xys_index:
                 hasXIndex = child_node.child[1].type == XREG;
@@ -58,7 +61,8 @@ void Group1::createInstruction(node &group_node, Line &asm_line) {
                 hasSIndex = child_node.child[1].type == SREG;
                 break;
             case long_ind_exp:
-                expression.buildRpnList(child_node.child[1]);
+                expression.buildRpnList(child_node.child[1], asm_line.lineText);
+                asm_line.expressionList.push_back({child_node.child[1].location, expression});
                 hasYIndex = child_node.child.size() == 4;
                 isIndirectLong = true;
                 break;
@@ -142,11 +146,17 @@ void Group1::createInstruction(node &group_node, Line &asm_line) {
             asm_line.addressMode = AddressModes::sr_ind_y;
         }
         else {
-            throw CasmErrorException("Bad Address mode.", group_node.child.front().lineno,
-                                     group_node.child.front().col_offset);
+            throw CasmErrorException("Bad Address mode.", group_node.child.front().location,
+                                     asm_line.lineText);
         }
     }
-    asm_line.expressionList.push_back(expression);
+}
+
+void Group1::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType == CpuType::CPU_6502) {
+
+    }
+    Instruction::pass1(asm_line, state);
 }
 
 int InstAdc::getSize(Line &Line, AsmState &state) {

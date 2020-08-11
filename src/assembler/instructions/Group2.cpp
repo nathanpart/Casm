@@ -8,7 +8,7 @@
 #include "../../Parser/token.h"
 #include "../../Parser/graminit.h"
 #include "../Line.h"
-
+#include "../Error.h"
 using namespace std;
 
 void Group2::createInstruction(node &group_node, Line &asm_line) {
@@ -30,8 +30,8 @@ void Group2::createInstruction(node &group_node, Line &asm_line) {
                 break;
             case exp:
                 hasOperand = true;
-                expression.buildRpnList(group_node);
-                asm_line.expressionList.push_back(expression);
+                expression.buildRpnList(group_node, asm_line.lineText);
+                asm_line.expressionList.push_back({group_node.location, expression});
                 break;
             case x_index:
                 hasOperand = true;
@@ -74,7 +74,20 @@ void Group2::createInstruction(node &group_node, Line &asm_line) {
 
     }
 
+}
 
+void InstDec::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType == CpuType::CPU_6502) {
+        throw CasmErrorException("A 6502 does not have accumulator address mode for DEC.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
+}
 
-
+void InstInc::pass1(Line &asm_line, AsmState &state) {
+    if (state.cpuType == CpuType::CPU_6502) {
+        throw CasmErrorException("A 6502 does not have accumulator address mode for INC.",
+                                 asm_line.instructionLoc, asm_line.lineText);
+    }
+    Instruction::pass1(asm_line, state);
 }

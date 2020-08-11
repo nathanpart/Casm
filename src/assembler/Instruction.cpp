@@ -29,6 +29,7 @@
 #include "MacroLine.h"
 #include "IncludeLine.h"
 #include "AddressMode.h"
+#include "Error.h"
 
 using namespace std;
 
@@ -125,5 +126,9 @@ void Instruction::pass1(Line &asm_line, AsmState &state) {
     if (asm_line.lineType == LineTypes::cpu) {
         state.defineLabel();
         state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, true) + 1);
+    }
+    if (!hasAddressMode(state)) {
+        throw CasmErrorException("The currently selected cpu does not support this address mode.",
+                                 asm_line.instructionLoc, asm_line.lineText);
     }
 }

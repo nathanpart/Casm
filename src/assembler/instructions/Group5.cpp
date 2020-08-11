@@ -28,7 +28,8 @@ void Group5::createInstruction(node &group_node, Line &asm_line) {
                             asm_line.hasShort = true;
                             break;
                         case exp:
-                            expression.buildRpnList(imm_node);
+                            expression.buildRpnList(imm_node, asm_line.lineText);
+                            asm_line.expressionList.push_back({imm_node.location, expression});
                             break;
                     }
                 }
@@ -41,7 +42,8 @@ void Group5::createInstruction(node &group_node, Line &asm_line) {
                 break;
 
             case exp:
-                expression.buildRpnList(child_node);
+                expression.buildRpnList(child_node, asm_line.lineText);
+                asm_line.expressionList.push_back({child_node.location, expression});
                 break;
 
             case GROUP5_INST:
@@ -60,5 +62,4 @@ void Group5::createInstruction(node &group_node, Line &asm_line) {
     if (asm_line.addressMode != AddressModes::imm) {
         asm_line.addressMode = asm_line.hasDpZp ? AddressModes::dp : AddressModes::abs;
     }
-    asm_line.expressionList.push_back(expression);
 }

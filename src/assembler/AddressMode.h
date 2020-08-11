@@ -11,5 +11,6 @@
 
 bool isExpTreeIndirect(node *&exp_node, bool &hasXIndex, bool &hasSIndex);
 int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum = true);
+bool hasAddressMode(AsmState &state);
 
 #endif //CASM_ADDRESSMODE_H

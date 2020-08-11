@@ -14,7 +14,7 @@ class Group16 : public Instruction {
 public:
     explicit Group16(int op_code) : opCode(op_code) {}
 
-    int getSize(Line &asm_line, AsmState &state) override;
+    void pass1(Line &asm_line, AsmState &state) override;
 
     void getObjectCode(uint8_t *ptr, Line &asm_line, AsmState &state) override;;
     static void createInstruction(node &group_node, Line &asm_line);
