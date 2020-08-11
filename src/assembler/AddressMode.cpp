@@ -48,6 +48,9 @@ bool isExpTreeIndirect(node *&exp_node, bool &hasXIndex, bool &hasSIndex) {
 int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum) {
     switch (mode) {
         case AddressModes::imm:
+            if (state.cpuType != CpuType::CPU_65C816) {
+                return 1;
+            }
             if (state.currentLine->hasWide) {
                 return 2;
             }
