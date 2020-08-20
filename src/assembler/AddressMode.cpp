@@ -2,16 +2,16 @@
 // Created by nathan on 7/22/20.
 //
 
-#include <set>
-
 #include "../Parser/graminit.h"
 #include "AddressMode.h"
 #include "../Parser/token.h"
 #include "Line.h"
-
+#include "Error.h"
 
 using namespace std;
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCDFAInspection"
 static bool findAtom(node *&cur_node) {
     if (cur_node->type == atom)
         return true;
@@ -21,6 +21,8 @@ static bool findAtom(node *&cur_node) {
     cur_node = &cur_node->child.front();
     return findAtom(cur_node);
 }
+#pragma clang diagnostic pop
+
 
 bool isExpTreeIndirect(node *&exp_node, bool &hasXIndex, bool &hasSIndex) {
     node *node_ptr = exp_node;
@@ -45,7 +47,7 @@ bool isExpTreeIndirect(node *&exp_node, bool &hasXIndex, bool &hasSIndex) {
 }
 
 
-int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum) {
+int getAddressModeSize(AddressModes mode, AsmState &state, char imm_operand_size) {
     switch (mode) {
         case AddressModes::imm:
             if (state.cpuType != CpuType::CPU_65C816) {
@@ -57,12 +59,14 @@ int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum) {
             if (state.currentLine->hasShort) {
                 return 1;
             }
-            if (isAccum) {
+            if (imm_operand_size == 'A') {
                 return state.isAccumWide ? 2 : 1;
             }
-            else {
+            else if (imm_operand_size == 'X'){
                 return state.isIndexWide ? 2 : 1;
             }
+            else
+                return 1;
 
         case AddressModes::acc:
         case AddressModes::imp:
@@ -91,6 +95,7 @@ int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum) {
         case AddressModes::abs_ind_x:
         case AddressModes::block:
         case AddressModes::abs_ind_long:
+        case AddressModes::dp_rel:
             return 2;
 
         case AddressModes::abs_long:
@@ -99,41 +104,198 @@ int getAddressModeSize(AddressModes mode, AsmState &state, bool isAccum) {
     }
 }
 
-bool hasAddressMode(AsmState &state) {
-    static set<AddressModes> cpu65502Modes = {
-            AddressModes::imm, AddressModes::abs, AddressModes::dp, AddressModes::abs_x, AddressModes::abs_y,
-            AddressModes::dp_x, AddressModes::dp_y, AddressModes::dp_ind_x, AddressModes::dp_ind_y,
-            AddressModes::acc, AddressModes::rel, AddressModes::imp, AddressModes::abs_ind
-    };
-
-    static set<AddressModes> cpu65C02Modes = {
-            AddressModes::imm, AddressModes::abs, AddressModes::dp, AddressModes::abs_x, AddressModes::abs_y,
-            AddressModes::dp_x, AddressModes::dp_y, AddressModes::dp_ind_x, AddressModes::dp_ind_y,
-            AddressModes::acc, AddressModes::rel, AddressModes::imp, AddressModes::abs_ind, AddressModes::abs_ind_x,
-            AddressModes::dp_ind
-    };
-
-    static set<AddressModes> cpu65816Modes = {
-            AddressModes::imm, AddressModes::abs, AddressModes::dp, AddressModes::abs_x, AddressModes::abs_y,
-            AddressModes::dp_x, AddressModes::dp_y, AddressModes::dp_ind_x, AddressModes::dp_ind_y,
-            AddressModes::acc, AddressModes::rel, AddressModes::imp, AddressModes::abs_ind, AddressModes::abs_ind_x,
-            AddressModes::abs_ind_long, AddressModes::abs_long, AddressModes::abs_long_x, AddressModes::dp_ind,
-            AddressModes::dp_ind_long, AddressModes::dp_ind_long_y, AddressModes::rel_long, AddressModes::sr,
-            AddressModes::sr_ind_y, AddressModes::block
-    };
-
-    switch (state.cpuType) {
-        case CpuType::CPU_6502:
-            if (cpu65502Modes.count(state.currentLine->addressMode) == 0)
-                return false;
+void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {
+    switch (mode) {
+        case AddressModes::imm:
+            storeImmediate(*state.currentLine, state, imm_operand_size);
             break;
-        case CpuType::CPU_65C02:
-            if (cpu65C02Modes.count(state.currentLine->addressMode) == 0)
-                return false;
+        case AddressModes::dp:
+        case AddressModes::dp_ind:
+        case AddressModes::dp_ind_long:
+        case AddressModes::dp_x:
+        case AddressModes::dp_y:
+        case AddressModes::dp_ind_x:
+        case AddressModes::dp_ind_y:
+        case AddressModes::dp_ind_long_y:
+        case AddressModes::sr:
+        case AddressModes::sr_ind_y:
+            storeByte(*state.currentLine, state);
             break;
-        case CpuType::CPU_65C816:
-            if (cpu65816Modes.count(state.currentLine->addressMode) == 0)
-                return false;
+        case AddressModes::abs:
+        case AddressModes::abs_x:
+        case AddressModes::abs_y:
+        case AddressModes::long_ind:
+        case AddressModes::abs_ind:
+        case AddressModes::abs_ind_x:
+        case AddressModes::abs_ind_long:
+            storeAbsolute(*state.currentLine, state);
+            break;
+        case AddressModes::rel:
+            storeRelative(*state.currentLine, state);
+            break;
+        case AddressModes::rel_long:
+            storeRelativeLong(*state.currentLine, state);
+            break;
+        case AddressModes::block:
+            storeBlock(*state.currentLine, state);
+            break;
+        case AddressModes::dp_rel:
+            storeByteAndRelative(*state.currentLine, state);
+            break;
+        default:
+            ;               // accumulator & implied addressing modes have no operand
     }
-    return true;
 }
+
+void storeImmediate(Line &asm_line, AsmState &state, char imm_size_flag) {
+    if (state.cpuType == CpuType::CPU_65C816 &&
+            (asm_line.hasWide ||
+            (imm_size_flag == 'A' && state.isAccumWide) || (imm_size_flag == 'X' && state.isIndexWide))) {
+        storeAbsolute(asm_line, state);
+        return;
+    };
+    storeByte(asm_line, state);
+}
+
+void storeAbsolute(Line &asm_line, AsmState &state) {
+    unsigned exp_value;
+    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    exp_value = exp_opt->value;
+    if (exp_opt->value < -32768 || exp_opt->value > 0xFFFF) {
+        // Warning value out of range
+    }
+
+    state.addRelocationEntry(*exp_opt, 2, asm_line.expressionList.front().loc);
+
+    exp_value &= 0xFFFFu;
+    state.storeByte(exp_value & 0xFFu);
+    state.storeByte((exp_value >> 8u) & 0xFFu);
+}
+
+void storeLong(Line &asm_line, AsmState &state) {
+    unsigned exp_value;
+    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    exp_value = exp_opt->value;
+    if (exp_opt->value < -8388608 || exp_opt->value > 0xFFFFFF) {
+        // Warning value out of range
+    }
+
+    state.addRelocationEntry(*exp_opt, 3, asm_line.expressionList.front().loc);
+
+    exp_value &= 0xFFFFFFu;
+    state.storeByte(exp_value & 0xFFu);
+    state.storeByte((exp_value >> 8u) & 0xFFu);
+    state.storeByte((exp_value >> 16u) & 0xFFu);
+}
+
+void storeByte(Line &asm_line, AsmState &state) {
+    unsigned exp_value;
+    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+
+    state.addRelocationEntry(*exp_opt, 1, asm_line.expressionList.front().loc);
+
+    exp_value = exp_opt->value;
+    if (exp_opt->value < -128 || exp_opt->value > 255) {
+        // Warning value out of range
+    }
+    state.storeByte(exp_value & 0xFFu);
+}
+
+void storeRelative(Line &asm_line, AsmState &state) {
+    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    int offset = exp_opt->value - (state.getCurrentOffset(asm_line.expressionList.front().loc) + 1);
+    if (offset < -128 || offset > 127) {
+        throw CasmErrorException("Relative destination is out of range.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    state.storeByte(offset);
+}
+
+void storeRelativeLong(Line &asm_line, AsmState &state) {
+    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    int offset = exp_opt->value - (state.getCurrentOffset(asm_line.expressionList.front().loc) + 1);
+    if (offset < -32768 || offset > 32767) {
+        throw CasmErrorException("Relative long destination is out of range.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    unsigned u_offset = offset;
+    state.storeByte(u_offset & 0xFFu);
+    state.storeByte((u_offset >> 8u) & 0xFFu);
+}
+
+void storeBlock(Line &asm_line, AsmState &state) {
+    unsigned exp_value;
+    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    state.addRelocationEntry(*exp_opt, 1, asm_line.expressionList.front().loc);
+    exp_value = exp_opt->value;
+    if (exp_opt->value < -128 || exp_opt->value > 255) {
+        // Warning value out of range
+    }
+    state.storeByte(exp_value & 0xFFu);
+
+    exp_opt = asm_line.expressionList.back().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.back().loc,
+                                 asm_line.lineText);
+    }
+    state.addRelocationEntry(*exp_opt, 1, asm_line.expressionList.front().loc);
+    exp_value = exp_opt->value;
+    if (exp_opt->value < -128 || exp_opt->value > 255) {
+        // Warning value out of range
+    }
+    state.storeByte(exp_value & 0xFFu);
+}
+
+void storeByteAndRelative(Line &asm_line, AsmState &state) {
+    unsigned exp_value;
+    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+                                 asm_line.lineText);
+    }
+    state.addRelocationEntry(*exp_opt, 1, asm_line.expressionList.front().loc);
+    exp_value = exp_opt->value;
+    if (exp_opt->value < -128 || exp_opt->value > 255) {
+        // Warning value out of range
+    }
+    state.storeByte(exp_value & 0xFFu);
+
+    exp_opt = asm_line.expressionList.back().exp.getValue(state);
+    if (!exp_opt) {
+        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.back().loc,
+                                 asm_line.lineText);
+    }
+    int offset = exp_opt->value - (state.getCurrentOffset(asm_line.expressionList.back().loc) + 1);
+    if (offset < -128 || offset > 127) {
+        throw CasmErrorException("Relative destination is out of range.", asm_line.expressionList.back().loc,
+                                 asm_line.lineText);
+    }
+    state.storeByte(offset);
+}
+
+
+

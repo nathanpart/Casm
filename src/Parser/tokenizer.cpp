@@ -182,6 +182,12 @@ int eval_name(string &work_line, short &type, std::string &str, int &length) {
             { GROUP15_INST, regex("^pei", regex::icase)},
             { GROUP16_INST, regex("^(brk|cop)", regex::icase)},
 
+            // R65C02 specific opcodes
+            { GROUP7_INST, regex("^(bbr0|bbr1|bbr2|bbr3|bbr4|bbr5|bbr6|bbr7)", regex::icase)},
+            { GROUP7_INST, regex("^(bbs0|bbs1|bbs2|bbs3|bbs4|bbs5|bbs6|bbs7)", regex::icase)},
+            { GROUP15_INST, regex("^(rmb0|rmb1|rmb2|rmb3|rmb4|rmb5|rmb6|rmb7)", regex::icase)},
+            { GROUP15_INST, regex("^(smb0|smb1|smb2|smb3|smb4|smb5|smb6|smb7)", regex::icase)},
+
             { EQU, regex("^equ", regex::icase)},
             { PARA, regex("^para", regex::icase)},
             { PAGE, regex("^page", regex::icase)},

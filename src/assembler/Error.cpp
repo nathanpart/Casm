@@ -19,3 +19,16 @@ void printErrorMsg(const string& msg, const Location& location, const string& li
     }
     cerr << location.locationName << " - Line: " << location.lineNumber << " Column: " << location.column << "\n\n";
 }
+
+void printWarnMsg(const string& msg, const Location& location, const string& lineText) {
+    cerr << "Warning:" << msg << "\n";
+
+    if (!lineText.empty()) {
+        cerr << lineText << "\n";
+        for (int i = 0; i < location.column; i++)
+            cerr << " ";
+        cerr << "^~~\n";
+    }
+    cerr << location.locationName << " - Line: " << location.lineNumber << " Column: " << location.column << "\n\n";
+
+}

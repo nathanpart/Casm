@@ -7,15 +7,17 @@
 
 #include <string>
 #include <map>
+#include "Cpu.h"
 
 #include "Location.h"
 #include "Segment.h"
 #include "Symbols.h"
 
+
+
 struct Value;
 struct Line;
 
-enum class CpuType {CPU_6502, CPU_65C02, CPU_65C816};
 
 struct CondItem {
     bool isActive;
@@ -50,11 +52,13 @@ public:
     bool resolveSymbol(const std::string& symbol_name, Value &value, Location &loc);
     int getCurrentOffset(Location &loc);
     void pass1(Line &line);
+    void pass2(Line &line);
+    void pass2Setup();
     bool inSegment() {
         return currentSegment != nullptr;
     }
     void endSegment() {
-        currentSegment->endSegment();
+        currentSegment->endSegment(*this);
         currentSegment = nullptr;
     }
     void enterSegment(std::string &name, SegmentType &seg_type, AlignType &align_type);
@@ -70,6 +74,8 @@ public:
     void endConditionalBlock();
     [[nodiscard]] bool getActiveFlag() const { return isActive; }
     bool hasSymbol(const std::string& symbol_name);
+    void storeByte(uint8_t byt);
+    void addRelocationEntry(const Value& value, int operand_size, const Location& loc);
 };
 
 

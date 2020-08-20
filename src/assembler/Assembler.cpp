@@ -25,6 +25,8 @@ Assembler::Assembler() {
 void Assembler::assemble(const string& file_name) {
     ifstream source = ifstream(file_name);
     pre_process(source, file_name);
+    pass1();
+    pass2();
 }
 
 void Assembler::pre_process(ifstream &source_stream, const string& name) {
@@ -98,7 +100,10 @@ void Assembler::pass1() {
 }
 
 void Assembler::pass2() {
-
+    state->pass2Setup();
+    for (auto &current_line: lines) {
+        state->pass2(current_line);
+    }
 }
 
 

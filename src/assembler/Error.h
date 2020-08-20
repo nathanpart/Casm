@@ -33,6 +33,6 @@ public:
 };
 
 void printErrorMsg(const std::string& msg, const Location& location, const std::string& lineText);
-
+void printWarnMsg(const std::string& msg, const Location& location, const std::string& lineText);
 
 #endif //CASM_ERROR_H

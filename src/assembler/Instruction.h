@@ -7,21 +7,46 @@
 
 
 #include <memory>
-//#include "Line.h"
+#include <set>
+
+#include "Cpu.h"
+
 #include "AsmState.h"
 
 class Line;
 class node;
-enum class AddressMode;
 
 class Instruction {
+
+protected:
+    CpuOpcodes *opCodes;
+    std::set<CpuType> cpus;
+    char immType = 0;
+    CpuMnemonics instruction;
+    uint8_t opCode;
+
 public:
-    virtual int getSize(Line &Line, AsmState &state) { return 0; }
-    virtual void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {}
-    virtual void pass1(Line &asm_line, AsmState &state);
-
-
     static void createInstruction(node &inst_node, Line &asm_line);
+    static void createGroup1(node &group_node, Line &asm_line);
+    static void createGroup2(node &group_node, Line &asm_line);
+    static void createGroup3(node &group_node, Line &asm_line);
+    static void createGroup4(node &group_node, Line &asm_line);
+    static void createGroup5(node &group_node, Line &asm_line);
+    static void createGroup6(node &group_node, Line &asm_line);
+    static void createGroup7(node &group_node, Line &asm_line);
+    static void createGroup8(node &group_node, Line &asm_line);
+    static void createGroup9(node &group_node, Line &asm_line);
+    static void createGroup10(node &group_node, Line &asm_line);
+    static void createGroup11(node &group_node, Line &asm_line);
+    static void createGroup12(node &group_node, Line &asm_line);
+    static void createGroup13(node &group_node, Line &asm_line);
+    static void createGroup14(node &group_node, Line &asm_line);
+    static void createGroup15(node &group_node, Line &asm_line);
+    static void createGroup16(node &group_node, Line &asm_line);
+
+    void setInstruction(const std::string &inst_str);
+    virtual void pass1(Line &asm_line, AsmState &state);
+    virtual void pass2(Line &asm_line, AsmState &state);
 };
 
 

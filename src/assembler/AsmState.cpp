@@ -56,7 +56,7 @@ bool AsmState::resolveSymbol(const string& symbol_name, Value &value, Location &
                 value.externalName = offset_name;
                 value.externalSeg = seg_name;
                 value.value = 0;
-                value.type = currentLine->hasLong ? ValueType::big : ValueType::relocatable;
+                value.type = ValueType::relocatable;
             }
             if (!success && isPassTwo) {
                 throw CasmErrorException("Symbol not found.", loc, currentLine->lineText);
@@ -112,6 +112,31 @@ void AsmState::pass1(Line &line) {
         if (line.lineType == LineTypes::pseudo_op) {
             line.instruction->pass1(line, *this);
         }
+    }
+}
+
+void AsmState::pass2(Line &line) {
+    globalLine++;
+    currentLine = &line;
+    if (isActive || line.lineType == LineTypes::pseudo_op) {
+        line.instruction->pass2(line, *this);
+    }
+}
+
+void AsmState::pass2Setup() {
+    globalLine = 0;
+    isActive = true;   // Should already be true if the conditions.empty check passes
+    isPassTwo = true;
+    if (currentSegment != nullptr) {
+        throw CasmErrorException("End of file reached before closing ENDS.",
+                                 currentLine->labelLoc, currentLine->lineText);
+    }
+    if (!conditions.empty()) {
+        throw CasmErrorException("Endo of file reached before a closing ENDIF.",
+                                 currentLine->labelLoc, currentLine->lineText);
+    }
+    for (auto &seg: segments) {
+        seg.second.pass2Setup();
     }
 }
 
@@ -248,6 +273,17 @@ bool AsmState::hasSymbol(const string& symbol_name) {
         return true;
     }
     return globals.count(offset_name);
+}
+
+
+
+void AsmState::storeByte(uint8_t byt) {
+    currentLine->opCodes.push_back(byt);
+    currentSegment->storeByte(byt);
+}
+
+void AsmState::addRelocationEntry(const Value &value, int operand_size, const Location &loc)  {
+    currentSegment->addRelocationEntry(value, operand_size, loc, currentLine->lineText);
 }
 
 

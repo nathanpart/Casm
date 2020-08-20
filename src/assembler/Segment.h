@@ -30,13 +30,21 @@ enum class AlignType {
 
 class AsmState;
 
+enum class RelocationTypes { high_byte, low_byte, address};
+struct RelocationItem {
+    int offset;
+    int baseOffset;
+    RelocationTypes type;
+};
 
 struct SegmentArea {
     int startAddress;
     AlignType alignment;
-    uint8_t *objectCode;
+    std::vector<uint8_t> objectCode;
     int size;
     bool isBlock;
+    std::vector<RelocationItem> relocationTable;
+    std::vector<int> segmentRefs;
 };
 
 
@@ -52,12 +60,13 @@ class Segment {
     std::map<std::string, Symbol> variables;
     std::map<std::string, ExportItem> exports;
     std::map<std::string, ImportDeclaration> imports;
-    std::map<std::string, ImportItem> importRefs;
+    std::vector<ImportItem> importRefs;
 
     std::vector<SegmentArea> section;
-    SegmentArea *currentSection = nullptr;
+    std::vector<SegmentArea>::iterator currentSection = section.end();
     int currentOffset;
 
+    bool isPass2 = false;
 public:
     explicit Segment(std::string seg_name = "", int base_address = 0, SegmentType seg_type = SegmentType::normal,
             AlignType align_type = AlignType::byte) :
@@ -76,12 +85,15 @@ public:
         return isAbsolute ? currentOffset + baseAddress : currentOffset;
     }
     void enterSection(AlignType section_alignment, const Location &loc, const std::string &line);
-    void endSegment() { currentSection->size = currentOffset - currentSection->startAddress; }
+    void endSegment(AsmState &state);
     void assignSymbol(std::string &symbol_name, AsmState &state);
     void enterBlock(int block_address);
     bool inBlock() { return currentSection->isBlock; }
     void defineLabel(std::string &label_name, AsmState &state);
     void allocateSpace(int size, AsmState &state);
+    void storeByte(uint8_t byt) { currentSection->objectCode.push_back(byt); }
+    void pass2Setup();
+    void addRelocationEntry(const Value& value, int operand_size, const Location& loc, const std::string& line_text);
 };
 
 

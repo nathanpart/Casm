@@ -3,22 +3,7 @@
 //
 
 
-#include <instructions/Group1.h>
-#include <instructions/Group2.h>
-#include <instructions/Group4.h>
-#include <instructions/Group3.h>
-#include <instructions/Group5.h>
-#include <instructions/Group6.h>
-#include <instructions/Group7.h>
-#include <instructions/Group8.h>
-#include <instructions/Group9.h>
-#include <instructions/Group10.h>
-#include <instructions/Group11.h>
-#include <instructions/Group12.h>
-#include <instructions/Group13.h>
-#include <instructions/Group14.h>
-#include <instructions/Group15.h>
-#include <instructions/Group16.h>
+#include <Cpu.h>
 #include "../Parser/token.h"
 #include "../Parser/graminit.h"
 #include "Instruction.h"
@@ -31,6 +16,7 @@
 #include "AddressMode.h"
 #include "Error.h"
 
+
 using namespace std;
 
 void Instruction::createInstruction(node &inst_node, Line &asm_line) {
@@ -41,52 +27,52 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
             asm_line.lineType = LineTypes::cpu;
             switch (child.type) {
                 case GROUP1_INST:
-                    Group1::createInstruction(child, asm_line);
+                    createGroup1(child, asm_line);
                     break;
                 case GROUP2_INST:
-                    Group2::createInstruction(child, asm_line);
+                    createGroup2(child, asm_line);
                     break;
                 case GROUP3_INST:
-                    Group3::createInstruction(child, asm_line);
+                    createGroup3(child, asm_line);
                     break;
                 case GROUP4_INST:
-                    Group4::createInstruction(child, asm_line);
+                    createGroup4(child, asm_line);
                     break;
                 case GROUP5_INST:
-                    Group5::createInstruction(child, asm_line);
+                    createGroup5(child, asm_line);
                     break;
                 case GROUP6_INST:
-                    Group6::createInstruction(child, asm_line);
+                    createGroup6(child, asm_line);
                     break;
                 case GROUP7_INST:
-                    Group7::createInstruction(child, asm_line);
+                    createGroup7(child, asm_line);
                     break;
                 case GROUP8_INST:
-                    Group8::createInstruction(child, asm_line);
+                    createGroup8(child, asm_line);
                     break;
                 case GROUP9_INST:
-                    Group9::createInstruction(child, asm_line);
+                    createGroup9(child, asm_line);
                     break;
                 case GROUP10_INST:
-                    Group10::createInstruction(child, asm_line);
+                    createGroup10(child, asm_line);
                     break;
                 case GROUP11_INST:
-                    Group11::createInstruction(child, asm_line);
+                    createGroup11(child, asm_line);
                     break;
                 case GROUP12_INST:
-                    Group12::createInstruction(child, asm_line);
+                    createGroup12(child, asm_line);
                     break;
                 case GROUP13_INST:
-                    Group13::createInstruction(child, asm_line);
+                    createGroup13(child, asm_line);
                     break;
                 case GROUP14_INST:
-                    Group14::createInstruction(child, asm_line);
+                    createGroup14(child, asm_line);
                     break;
                 case GROUP15_INST:
-                    Group15::createInstruction(child, asm_line);
+                    createGroup15(child, asm_line);
                     break;
                 case GROUP16_INST:
-                    Group16::createInstruction(child, asm_line);
+                    createGroup16(child, asm_line);
                     break;
             }
             break;
@@ -123,12 +109,43 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
 }
 
 void Instruction::pass1(Line &asm_line, AsmState &state) {
-    if (asm_line.lineType == LineTypes::cpu) {
-        state.defineLabel();
-        state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, true) + 1);
+    if (asm_line.lineType != LineTypes::cpu) return;
+
+    if (cpus.count(state.cpuType) == 0) {
+        throw CasmErrorException("The currently selected cpu does not support this instruction",
+                                 asm_line.instructionLoc, asm_line.lineText);
     }
-    if (!hasAddressMode(state)) {
+    uint8_t cpu_op;
+    set<CpuType> cpu_type;
+
+    auto addr_mode_rec = opCodes->at(asm_line.addressMode);
+    tie(cpu_op, cpu_type) = addr_mode_rec;
+    if (cpu_type.count(state.cpuType) == 0) {
         throw CasmErrorException("The currently selected cpu does not support this address mode.",
                                  asm_line.instructionLoc, asm_line.lineText);
+    }
+    opCode = cpu_op;
+    state.defineLabel();
+    state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, immType) + 1);
+}
+
+void Instruction::pass2(Line & asm_line, AsmState & state) {
+    state.storeByte(opCode);
+    writeOperand(asm_line.addressMode, state, immType);
+}
+
+void Instruction::setInstruction(const string &inst_str) {
+    for (auto& instr: cpuInstrMap) {
+        auto& instr_rec = instr.second;
+        instruction = instr.first;
+        opCodes = &get<0>(instr_rec);
+        cpus = get<1>(instr_rec);
+        auto re = get<2>(instr_rec);
+        immType = get<3>(instr_rec);
+        smatch results;
+
+        if (regex_match(inst_str, results, re)) {
+            break;
+        }
     }
 }

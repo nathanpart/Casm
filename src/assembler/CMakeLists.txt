@@ -1,4 +1,4 @@
-add_subdirectory(instructions)
+
 add_library(assembler "")
 
 target_sources(assembler
@@ -20,6 +20,8 @@ target_sources(assembler
         IncludeLine.cpp
         SourceItem.cpp
         Error.cpp
+        groups.cpp
+        Cpu.cpp
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/Line.h
         ${CMAKE_CURRENT_LIST_DIR}/Assembler.h
@@ -40,8 +42,7 @@ target_sources(assembler
         ${CMAKE_CURRENT_LIST_DIR}/IncludeLine.h
         ${CMAKE_CURRENT_LIST_DIR}/SourceItem.h
         ${CMAKE_CURRENT_LIST_DIR}/Error.h
-
-
+        ${CMAKE_CURRENT_LIST_DIR}/Cpu.h
 )
 
 target_include_directories(assembler

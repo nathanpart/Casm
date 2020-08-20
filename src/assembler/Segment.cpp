@@ -49,7 +49,7 @@ bool Segment::resolveSymbol(std::string symbol_name, Value &value, AsmState &sta
         value.externalName = import.name;
         value.externalSeg = import.segmentName;
         value.value = 0;
-        value.type = state.currentLine->hasLong ? ValueType::big : ValueType::relocatable;
+        value.type = ValueType::relocatable;
         return true;
     }
 
@@ -78,14 +78,14 @@ bool Segment::hasSymbol(const std::string& sym_name) {
     if (sym_name.back() == '&') {
         return variables.count(sym_name) > 0;
     }
-    return labelTable.hasLabel(sym_name) || (symbols.count(sym_name) > 0) || (importRefs.count(sym_name) > 0);
+    return labelTable.hasLabel(sym_name) || (symbols.count(sym_name) > 0) || (imports.count(sym_name) > 0);
 }
 
 void Segment::enterSection(AlignType section_alignment, const Location &loc, const string &line) {
     unsigned start_offset;
-    if (currentSection != nullptr) {
+    if (currentSection != section.end()) {
         if (currentSection->isBlock) {
-            auto prev_section = section.rbegin() + 1;
+            auto prev_section = currentSection - 1;
             start_offset = prev_section->startAddress + prev_section->size + currentSection->size;
         }
         else {
@@ -93,47 +93,50 @@ void Segment::enterSection(AlignType section_alignment, const Location &loc, con
         }
     }
     else {
-        start_offset = 0;
+        start_offset = baseAddress;
     }
-    unsigned test_mask;
-    unsigned and_mask;
-    unsigned increment;
-    switch (section_alignment) {
-        case AlignType::byte:
-            test_mask = 0x0000;
-            and_mask = 0xFFFF;
-            increment = 0;
-            break;
-        case AlignType::word:
-            test_mask = 0x0001;
-            and_mask = 0xFFFE;
-            increment = 2;
-            break;
-        case AlignType::dword:
-            test_mask = 0x0003;
-            and_mask = 0xFFFC;
-            increment = 4;
-            break;
-        case AlignType::para:
-            test_mask = 0x000F;
-            and_mask = 0xFFF0;
-            increment = 16;
-            break;
-        case AlignType::page:
-            test_mask = 0x00FF;
-            and_mask = 0xFF00;
-            increment = 256;
-            break;
+    if (!isPass2) {
+        unsigned test_mask;
+        unsigned and_mask;
+        unsigned increment;
+        switch (section_alignment) {
+            case AlignType::byte:
+                test_mask = 0x0000;
+                and_mask = 0xFFFF;
+                increment = 0;
+                break;
+            case AlignType::word:
+                test_mask = 0x0001;
+                and_mask = 0xFFFE;
+                increment = 2;
+                break;
+            case AlignType::dword:
+                test_mask = 0x0003;
+                and_mask = 0xFFFC;
+                increment = 4;
+                break;
+            case AlignType::para:
+                test_mask = 0x000F;
+                and_mask = 0xFFF0;
+                increment = 16;
+                break;
+            case AlignType::page:
+                test_mask = 0x00FF;
+                and_mask = 0xFF00;
+                increment = 256;
+                break;
+        }
+        if ((start_offset & test_mask) != 0) {
+            start_offset = (start_offset + increment) & and_mask;
+        }
+        if (start_offset > 0xFFFF) {
+            throw CasmErrorException("Segment wrap around.", loc, line);
+        }
+
+        section.push_back({static_cast<int>(start_offset), section_alignment, {}, 0, false});
     }
-    if ((start_offset & test_mask) != 0) {
-        start_offset = (start_offset + increment) & and_mask;
-    }
-    if (start_offset > 0xFFFF) {
-        throw CasmErrorException("Segment wrap around.", loc, line);
-    }
-    section.push_back({static_cast<int>(start_offset), section_alignment, nullptr, 0, false});
-    currentSection = &section.back();
-    currentOffset = static_cast<int>(start_offset);
+    currentSection = currentSection == section.end() ? section.begin() : currentSection + 1;
+    currentOffset = isPass2 ? currentSection->startAddress : static_cast<int>(start_offset);
 }
 
 
@@ -148,8 +151,10 @@ void Segment::assignSymbol(string &symbol_name, AsmState &state) {
 }
 
 void Segment::enterBlock(int block_address) {
-    section.push_back({block_address, AlignType::byte, nullptr, 0, true});
-    currentSection = &section.back();
+    if (!isPass2) {
+        section.push_back({block_address, AlignType::byte, {}, 0, true});
+    }
+    currentSection++;
     currentOffset = block_address;
 }
 
@@ -182,4 +187,64 @@ void Segment::allocateSpace(int size, AsmState &state) {
                                  state.currentLine->labelLoc, state.currentLine->lineText);
     }
     currentOffset += size;
+}
+
+void Segment::endSegment(AsmState &state) {
+    if (inBlock()) {
+        throw CasmErrorException("ENDS encountered while in a sub moudle block.",
+                                 state.currentLine->labelLoc, state.currentLine->lineText);
+    }
+    currentSection->size = currentOffset - currentSection->startAddress;
+}
+
+void Segment::pass2Setup() {
+    isPass2 = true;
+    currentSection = section.end();
+}
+
+void Segment::addRelocationEntry(const Value& value, int operand_size, const Location& loc, const string& line_text) {
+    if (!value.external && value.type == ValueType::absolute) return;
+
+    if (value.external) {
+        if (operand_size != 1 && (value.type == ValueType::relocatable_high ||
+                                  value.type == ValueType::relocatable_low ||
+                                  value.type == ValueType::segment)) {
+            printWarnMsg("Expression does not match operand size.", loc, line_text);
+        }
+        if (operand_size == 1 && value.type == ValueType::relocatable) {
+            printWarnMsg("Expression larger than byte operand.", loc, line_text);
+        }
+        if (operand_size == 3) {
+            importRefs.push_back({currentOffset, ValueType::big, value.externalSeg, value.externalName});
+        }
+        else {
+            importRefs.push_back({currentOffset, value.type, value.externalSeg, value.externalName});
+        }
+    } else {
+        if (value.type == ValueType::segment) {
+            if (operand_size > 1) {
+                throw CasmErrorException("Segment reference used in a multi-byte operand.", loc, line_text);
+            }
+            currentSection->segmentRefs.push_back(currentOffset);
+        }
+        else {
+            int offset = currentOffset;
+            if (operand_size == 3) {
+                currentSection->segmentRefs.push_back(currentOffset);
+                offset++;
+            }
+            RelocationTypes rel_type = RelocationTypes::address;
+            if (operand_size == 1) {
+                if (value.type == ValueType::relocatable_low) {
+                    rel_type = RelocationTypes::low_byte;
+                } else if (value.type == ValueType::relocatable_high) {
+                    rel_type = RelocationTypes::high_byte;
+                } else {
+                    printWarnMsg("Expression larger than byte operand.", loc, line_text);
+                    rel_type = RelocationTypes::low_byte;
+                }
+            }
+            currentSection->relocationTable.push_back({offset, value.baseValue, rel_type});
+        }
+    }
 }

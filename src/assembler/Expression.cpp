@@ -363,9 +363,6 @@ void Expression::evaluate(AsmState &state) {
                     lhs.value.type = ValueType::relocatable_high;
                 }
                 lhs.value.value = (lhs.value.value >> 8) & 0xFF;
-                if (lhs.value.type == ValueType::big) {
-                    lhs.value.type = ValueType::absolute;
-                }
                 break;
 
             case OpType::seg_byte:
@@ -379,9 +376,8 @@ void Expression::evaluate(AsmState &state) {
                     lhs.value.baseValue = lhs.value.value;
                     lhs.value.type = ValueType::segment;
                 }
-                lhs.value.value = (lhs.value.value >> 16) & 0xFF;
-                if (lhs.value.type == ValueType::big) {
-                    lhs.value.type = ValueType::absolute;
+                else {
+                    lhs.value.value = (lhs.value.value >> 16) & 0xFF;
                 }
                 break;
 
@@ -397,9 +393,6 @@ void Expression::evaluate(AsmState &state) {
                     lhs.value.type = ValueType::relocatable;
                 }
                 lhs.value.value &=  0xFFFF;
-                if (lhs.value.type == ValueType::big) {
-                    lhs.value.type = ValueType::absolute;
-                }
                 break;
 
 
