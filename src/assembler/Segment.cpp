@@ -141,13 +141,13 @@ void Segment::enterSection(AlignType section_alignment, const Location &loc, con
 
 
 
-void Segment::assignSymbol(string &symbol_name, AsmState &state) {
-    if (labelTable.hasLabel(symbol_name) || symbols.count(symbol_name) > 0 ||
-        imports.count(symbol_name) > 0) {
+void Segment::assignSymbol(string &symbol_name, AsmState &state, Value &value) {
+    if (!isPass2 && (labelTable.hasLabel(symbol_name) || symbols.count(symbol_name) > 0 ||
+        imports.count(symbol_name) > 0)) {
         throw CasmErrorException("Segment already has a symbol by this name defined.",
                                  state.currentLine->labelLoc, state.currentLine->lineText);
     }
-    symbols[symbol_name] = Symbol();
+    symbols[symbol_name] = {name, value};
 }
 
 void Segment::enterBlock(int block_address) {
@@ -191,10 +191,18 @@ void Segment::allocateSpace(int size, AsmState &state) {
 
 void Segment::endSegment(AsmState &state) {
     if (inBlock()) {
-        throw CasmErrorException("ENDS encountered while in a sub moudle block.",
+        throw CasmErrorException("ENDS encountered while in a sub module block.",
                                  state.currentLine->labelLoc, state.currentLine->lineText);
     }
-    currentSection->size = currentOffset - currentSection->startAddress;
+    if (state.isPassTwo) {
+        if (currentSection->size != currentOffset - currentSection->startAddress) {
+            throw CasmErrorException("Phase error - segment section size mismatch.",
+                                     state.currentLine->instructionLoc, state.currentLine->lineText);
+        }
+    }
+    else {
+        currentSection->size = currentOffset - currentSection->startAddress;
+    }
 }
 
 void Segment::pass2Setup() {

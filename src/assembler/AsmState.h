@@ -62,7 +62,7 @@ public:
         currentSegment = nullptr;
     }
     void enterSegment(std::string &name, SegmentType &seg_type, AlignType &align_type);
-    void assignSymbol(std::string &name);
+    void assignSymbol(std::string &name, Value &value);
     void doAlignment(AlignType &align_type, Location &loc);
     void enterBlock(int block_address) { currentSegment->enterBlock(block_address); }
     bool inBlock() { inSegment() && currentSegment->inBlock(); }

@@ -81,7 +81,7 @@ public:
     }
     void enterSection(AlignType section_alignment, const Location &loc, const std::string &line);
     void endSegment(AsmState &state);
-    void assignSymbol(std::string &symbol_name, AsmState &state);
+    void assignSymbol(std::string &symbol_name, AsmState &state, Value &value);
     void enterBlock(int block_address);
     bool inBlock() { return currentSection->isBlock; }
     void defineLabel(std::string &label_name, AsmState &state);

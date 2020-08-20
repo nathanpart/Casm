@@ -22,6 +22,7 @@ public:
     static void createInstruction(node &inst_node, Line &asm_line);
 
     void pass1(Line &asm_line, AsmState &state) override;
+    void pass2(Line &asm_line, AsmState &state) override;
 };
 
 

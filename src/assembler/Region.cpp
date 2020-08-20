@@ -77,3 +77,7 @@ void Region::pass1(Line &asm_line, AsmState &state) {
     }
     state.enterSegment(segmentName, segmentType, alignment);
 }
+
+void Region::pass2(Line &asm_line, AsmState &state) {
+    pass1(asm_line, state);
+}

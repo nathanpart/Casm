@@ -146,35 +146,43 @@ void AsmState::enterSegment(string &name, SegmentType &seg_type, AlignType &alig
         throw CasmErrorException("Currently in a segment.",
                                  currentLine->instructionLoc, currentLine->lineText);
     }
-    if (!currentLine->expressionList.empty()) {
-        auto value = currentLine->expressionList.front().exp.getValue(*this);
-        if (!value) {
-            throw CasmErrorException("Expression for segment base unknown in pass 1.",
-                                     currentLine->expressionList.front().loc, currentLine->lineText);
+    if (isPassTwo) {
+        if (segments.count(name) == 0) {
+            throw CasmErrorException("Phase error -- segment not found.",
+                                     currentLine->instructionLoc, currentLine->lineText);
         }
-        if (value->type != ValueType::absolute || value->external) {
-            throw CasmErrorException("Expression for segment base must not be relocatable.",
-                                     currentLine->expressionList.front().loc, currentLine->lineText);
-        }
-        base_address = value->value;
     }
-    if (segments.count(name) == 0) {
-        segments[name] = Segment(name, base_address, seg_type, align_type);
+    else {
+        if (!currentLine->expressionList.empty()) {
+            auto value = currentLine->expressionList.front().exp.getValue(*this);
+            if (!value) {
+                throw CasmErrorException("Expression for segment base unknown in pass 1.",
+                                         currentLine->expressionList.front().loc, currentLine->lineText);
+            }
+            if (value->type != ValueType::absolute || value->external) {
+                throw CasmErrorException("Expression for segment base must not be relocatable.",
+                                         currentLine->expressionList.front().loc, currentLine->lineText);
+            }
+            base_address = value->value;
+        }
+        if (segments.count(name) == 0) {
+            segments[name] = Segment(name, base_address, seg_type, align_type);
+        }
     }
     currentSegment = &segments[name];
     currentSegment->enterSection(align_type, currentLine->instructionLoc, currentLine->lineText);
 }
 
-void AsmState::assignSymbol(string &name) {
+void AsmState::assignSymbol(string &name, Value &value) {
     if (currentSegment == nullptr) {
-        if (globals.count(name) > 0) {
+        if (globals.count(name) > 0 && !isPassTwo) {
             throw CasmErrorException("Global symbol already defined.",
                                      currentLine->labelLoc, currentLine->lineText);
         }
-        globals[name] = Symbol();
+        globals[name] = {name, value};
     }
     else {
-        currentSegment->assignSymbol(name, *this);
+        currentSegment->assignSymbol(name, *this, value);
     }
 }
 
