@@ -14,11 +14,6 @@
 #include "Symbols.h"
 #include "ExportImport.h"
 
-struct RelocataItem {
-    int location;
-    ValueType type;
-};
-
 
 enum class SegmentType {
     absolute, zero_page, direct_page, normal, storage

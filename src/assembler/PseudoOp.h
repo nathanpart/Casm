@@ -15,10 +15,10 @@ class PseudoOp : public Instruction {
     std::string condSymbol;
 
 public:
-    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
     static void createInstruction(node &pseudo_node, Line &asm_line);
 
     void pass1(Line &asm_line, AsmState &state) override;
+    void pass2(Line &asm_line, AsmState &state) override;
     bool processFlags(AsmState& state) const;
     bool processConditionals(Line &asm_line, AsmState &state);
 };

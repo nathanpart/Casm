@@ -132,7 +132,7 @@ void AsmState::pass2Setup() {
                                  currentLine->labelLoc, currentLine->lineText);
     }
     if (!conditions.empty()) {
-        throw CasmErrorException("Endo of file reached before a closing ENDIF.",
+        throw CasmErrorException("End of file reached before a closing ENDIF.",
                                  currentLine->labelLoc, currentLine->lineText);
     }
     for (auto &seg: segments) {
@@ -176,7 +176,6 @@ void AsmState::assignSymbol(string &name) {
     else {
         currentSegment->assignSymbol(name, *this);
     }
-
 }
 
 void AsmState::doAlignment(AlignType &align_type, Location &loc) {

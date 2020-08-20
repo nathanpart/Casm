@@ -106,11 +106,6 @@ void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
 }
 
 
-void PseudoOp::getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {
-
-}
-
-
 void PseudoOp::pass1(Line &asm_line, AsmState &state) {
     int pseudo_op_size = 0;
     ExpValue value_opt;
@@ -189,6 +184,94 @@ void PseudoOp::pass1(Line &asm_line, AsmState &state) {
     }
 }
 
+void PseudoOp::pass2(Line &asm_line, AsmState &state) {
+    ExpValue value_opt;
+    Location loc;
+    if (processConditionals(asm_line, state))
+        return;
+    if (!state.getActiveFlag())
+        return;
+    if (processFlags(state)) {
+        state.defineLabel();
+        return;
+    }
+    switch (pseudoOp) {
+        case ALIGN:
+            if (!state.inSegment()) {
+                throw CasmErrorException("Not in a segment.", asm_line.instructionLoc, asm_line.lineText);
+            }
+            state.doAlignment(alignType, asm_line.instructionLoc);
+            break;
+        case BLOCK:
+            value_opt = asm_line.expressionList.front().exp.getValue(state);
+            if (!value_opt) {
+                throw CasmErrorException("Block's destination address not known on pass 2.",
+                                         asm_line.expressionList.front().loc, asm_line.lineText);
+            }
+            if (value_opt->type != ValueType::absolute || value_opt->external) {
+                throw CasmErrorException("Block's target expression cannot be external or relocatable.",
+                                         asm_line.expressionList.front().loc, asm_line.lineText);
+            }
+            if (state.inBlock()) {
+                throw CasmErrorException("Blocks cannot be nested.",
+                                         asm_line.instructionLoc, asm_line.lineText);
+            }
+            state.enterBlock(value_opt->value);
+            break;
+        case END_BLOCK:
+            if (!state.inBlock()) {
+                throw CasmErrorException("Not currently in a BLOCK.",
+                                         asm_line.instructionLoc, asm_line.lineText);
+            }
+            state.endBlock();
+            break;
+        case DB:
+            for (auto &exp_item: asm_line.expressionList) {
+                auto string_opt = exp_item.exp.getString(state);
+                if (!string_opt) {
+                    storeByte(exp_item, asm_line, state);
+                }
+                else {
+                    for(auto& ch: *string_opt) {
+                        state.storeByte(ch);
+                    }
+                }
+            }
+            break;
+        case DW:
+            for (auto &exp_item: asm_line.expressionList) {
+                storeAbsolute(exp_item, asm_line, state);
+            }
+            break;
+        case DBW:
+            for (auto &exp_item: asm_line.expressionList) {
+                storeAbsolute(exp_item, asm_line, state, true);
+            }
+            break;
+        case DA:
+            for (auto &exp_item: asm_line.expressionList) {
+                storeAbsolute(exp_item, asm_line, state, false, true);
+            }
+            break;
+        case DS:
+            value_opt = asm_line.expressionList.front().exp.getValue(state);
+            loc = asm_line.expressionList.front().loc;
+            if (!value_opt) {
+                throw CasmErrorException("Unable to evaluate operand for DS on pass 2.",
+                                         loc, asm_line.lineText);
+            }
+            if (value_opt->type != ValueType::absolute || value_opt->external) {
+                throw CasmErrorException("Operand for DS cannot be a relocatable.", loc, asm_line.lineText);
+            }
+            if (value_opt->value < 0) {
+                throw CasmErrorException("operand for DS cannot be negative.", loc, asm_line.lineText);
+            }
+            for (int i=0; i < value_opt->value; i++) {
+                state.storeByte(0);
+            }
+            break;
+    }
+}
 
 bool PseudoOp::processFlags(AsmState &state) const {
     switch (pseudoOp) {

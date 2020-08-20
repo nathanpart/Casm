@@ -119,7 +119,7 @@ void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {
         case AddressModes::dp_ind_long_y:
         case AddressModes::sr:
         case AddressModes::sr_ind_y:
-            storeByte(*state.currentLine, state);
+            storeByte(state.currentLine->expressionList.front(), *state.currentLine, state);
             break;
         case AddressModes::abs:
         case AddressModes::abs_x:
@@ -128,10 +128,10 @@ void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {
         case AddressModes::abs_ind:
         case AddressModes::abs_ind_x:
         case AddressModes::abs_ind_long:
-            storeAbsolute(*state.currentLine, state);
+            storeAbsolute(state.currentLine->expressionList.front(), *state.currentLine, state);
             break;
         case AddressModes::rel:
-            storeRelative(*state.currentLine, state);
+            storeRelative(state.currentLine->expressionList.front(), *state.currentLine, state);
             break;
         case AddressModes::rel_long:
             storeRelativeLong(*state.currentLine, state);
@@ -142,6 +142,9 @@ void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {
         case AddressModes::dp_rel:
             storeByteAndRelative(*state.currentLine, state);
             break;
+        case AddressModes::abs_long:
+        case AddressModes::abs_long_x:
+            storeLong(state.currentLine->expressionList.front(), *state.currentLine, state);
         default:
             ;               // accumulator & implied addressing modes have no operand
     }
@@ -151,36 +154,42 @@ void storeImmediate(Line &asm_line, AsmState &state, char imm_size_flag) {
     if (state.cpuType == CpuType::CPU_65C816 &&
             (asm_line.hasWide ||
             (imm_size_flag == 'A' && state.isAccumWide) || (imm_size_flag == 'X' && state.isIndexWide))) {
-        storeAbsolute(asm_line, state);
+        storeAbsolute(asm_line.expressionList.front(), asm_line, state);
         return;
-    };
-    storeByte(asm_line, state);
+    }
+    storeByte(asm_line.expressionList.front(), asm_line, state);
 }
 
-void storeAbsolute(Line &asm_line, AsmState &state) {
+void storeAbsolute(ExpItem &exp_item, Line &asm_line, AsmState &state, bool isBigEndian, bool isDA) {
     unsigned exp_value;
-    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    auto exp_opt = exp_item.exp.getValue(state);
     if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+        throw CasmErrorException("Unable to resolve expression.", exp_item.loc,
                                  asm_line.lineText);
     }
-    exp_value = exp_opt->value;
-    if (exp_opt->value < -32768 || exp_opt->value > 0xFFFF) {
+    exp_value = exp_opt->value - (isDA ? 2 : 0);
+    if (exp_opt->value - (isDA ? 2 : 0) < -32768 || exp_opt->value - (isDA ? 2 : 0) > 0xFFFF) {
         // Warning value out of range
     }
 
     state.addRelocationEntry(*exp_opt, 2, asm_line.expressionList.front().loc);
 
     exp_value &= 0xFFFFu;
-    state.storeByte(exp_value & 0xFFu);
-    state.storeByte((exp_value >> 8u) & 0xFFu);
+    if (isBigEndian) {
+        state.storeByte((exp_value >> 8u) & 0xFFu);
+        state.storeByte(exp_value & 0xFFu);
+    }
+    else {
+        state.storeByte(exp_value & 0xFFu);
+        state.storeByte((exp_value >> 8u) & 0xFFu);
+    }
 }
 
-void storeLong(Line &asm_line, AsmState &state) {
+void storeLong(ExpItem &exp_item, Line &asm_line, AsmState &state) {
     unsigned exp_value;
-    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    auto exp_opt = exp_item.exp.getValue(state);
     if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+        throw CasmErrorException("Unable to resolve expression.", exp_item.loc,
                                  asm_line.lineText);
     }
     exp_value = exp_opt->value;
@@ -196,11 +205,11 @@ void storeLong(Line &asm_line, AsmState &state) {
     state.storeByte((exp_value >> 16u) & 0xFFu);
 }
 
-void storeByte(Line &asm_line, AsmState &state) {
+void storeByte(ExpItem &exp_item, Line &asm_line, AsmState &state) {
     unsigned exp_value;
-    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+    auto exp_opt = exp_item.exp.getValue(state);
     if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+        throw CasmErrorException("Unable to resolve expression.", exp_item.loc,
                                  asm_line.lineText);
     }
 
@@ -213,15 +222,15 @@ void storeByte(Line &asm_line, AsmState &state) {
     state.storeByte(exp_value & 0xFFu);
 }
 
-void storeRelative(Line &asm_line, AsmState &state) {
-    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
+void storeRelative(ExpItem &exp_item, Line &asm_line, AsmState &state) {
+    auto exp_opt = exp_item.exp.getValue(state);
     if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
+        throw CasmErrorException("Unable to resolve expression.", exp_item.loc,
                                  asm_line.lineText);
     }
-    int offset = exp_opt->value - (state.getCurrentOffset(asm_line.expressionList.front().loc) + 1);
+    int offset = exp_opt->value - (state.getCurrentOffset(exp_item.loc) + 1);
     if (offset < -128 || offset > 127) {
-        throw CasmErrorException("Relative destination is out of range.", asm_line.expressionList.front().loc,
+        throw CasmErrorException("Relative destination is out of range.", exp_item.loc,
                                  asm_line.lineText);
     }
     state.storeByte(offset);
@@ -244,58 +253,11 @@ void storeRelativeLong(Line &asm_line, AsmState &state) {
 }
 
 void storeBlock(Line &asm_line, AsmState &state) {
-    unsigned exp_value;
-    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
-    if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
-                                 asm_line.lineText);
-    }
-    state.addRelocationEntry(*exp_opt, 1, asm_line.expressionList.front().loc);
-    exp_value = exp_opt->value;
-    if (exp_opt->value < -128 || exp_opt->value > 255) {
-        // Warning value out of range
-    }
-    state.storeByte(exp_value & 0xFFu);
-
-    exp_opt = asm_line.expressionList.back().exp.getValue(state);
-    if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.back().loc,
-                                 asm_line.lineText);
-    }
-    state.addRelocationEntry(*exp_opt, 1, asm_line.expressionList.front().loc);
-    exp_value = exp_opt->value;
-    if (exp_opt->value < -128 || exp_opt->value > 255) {
-        // Warning value out of range
-    }
-    state.storeByte(exp_value & 0xFFu);
+    storeByte(asm_line.expressionList.front(), asm_line, state);
+    storeByte(asm_line.expressionList.back(), asm_line, state);
 }
 
 void storeByteAndRelative(Line &asm_line, AsmState &state) {
-    unsigned exp_value;
-    auto exp_opt = asm_line.expressionList.front().exp.getValue(state);
-    if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.front().loc,
-                                 asm_line.lineText);
-    }
-    state.addRelocationEntry(*exp_opt, 1, asm_line.expressionList.front().loc);
-    exp_value = exp_opt->value;
-    if (exp_opt->value < -128 || exp_opt->value > 255) {
-        // Warning value out of range
-    }
-    state.storeByte(exp_value & 0xFFu);
-
-    exp_opt = asm_line.expressionList.back().exp.getValue(state);
-    if (!exp_opt) {
-        throw CasmErrorException("Unable to resolve expression.", asm_line.expressionList.back().loc,
-                                 asm_line.lineText);
-    }
-    int offset = exp_opt->value - (state.getCurrentOffset(asm_line.expressionList.back().loc) + 1);
-    if (offset < -128 || offset > 127) {
-        throw CasmErrorException("Relative destination is out of range.", asm_line.expressionList.back().loc,
-                                 asm_line.lineText);
-    }
-    state.storeByte(offset);
+    storeByte(asm_line.expressionList.front(), asm_line, state);
+    storeRelative(asm_line.expressionList.back(), asm_line, state);
 }
-
-
-
