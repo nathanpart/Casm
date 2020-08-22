@@ -1,7 +1,7 @@
 //
 // Created by nathan on 7/20/20.
 //
-
+#include <iostream>
 #include <fstream>
 
 #include "Assembler.h"
@@ -13,6 +13,7 @@
 #include "Error.h"
 #include "MacroLine.h"
 #include "IncludeLine.h"
+#include "ObjectFile.h"
 
 using namespace std;
 
@@ -95,14 +96,43 @@ void Assembler::pre_process(ifstream &source_stream, const string& name) {
 
 void Assembler::pass1() {
     for (auto &current_line: lines) {
-        state->pass1(current_line);
+        try {
+            state->pass1(current_line);
+        }
+        catch (CasmErrorException &ce) {
+            printErrorMsg(ce.what(), ce.getLocation(), ce.getLine());
+            errorCount++;
+            if (errorCount > errorLimit)
+                return;
+        }
     }
 }
 
 void Assembler::pass2() {
-    state->pass2Setup();
+    try {
+        state->pass2Setup();
+    }
+    catch (CasmErrorException &ce) {
+        printErrorMsg(ce.what(), ce.getLocation(), ce.getLine());
+        errorCount++;
+        return;
+    }
     for (auto &current_line: lines) {
-        state->pass2(current_line);
+        try {
+            state->pass2(current_line);
+        }
+        catch (CasmErrorException &ce) {
+            printErrorMsg(ce.what(), ce.getLocation(), ce.getLine());
+            errorCount++;
+            if (errorCount > errorLimit)
+                return;
+        }
+    }
+}
+
+void Assembler::writeObjectFile(const string &obj_file_name) {
+    if (!::writeObjectFile(obj_file_name, *state)) {
+        cerr << "Unable to write object file " << obj_file_name << "\n";
     }
 }
 

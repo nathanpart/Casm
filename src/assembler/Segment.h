@@ -13,14 +13,15 @@
 #include "Label.h"
 #include "Symbols.h"
 #include "ExportImport.h"
+#include "ObjectFile.h"
 
 
 enum class SegmentType {
-    absolute, zero_page, direct_page, normal, storage
+    absolute = 0, zero_page = 1, direct_page = 2, normal = 4, storage = 5
 };
 
 enum class AlignType {
-    byte, word, dword, para, page
+    byte = 0, word = 1, dword = 2, para = 3, page = 4
 };
 
 class AsmState;
@@ -41,6 +42,7 @@ struct SegmentArea {
     std::vector<RelocationItem> relocationTable;
     std::vector<int> segmentRefs;
 };
+using SectionList = std::vector<SegmentArea>;
 
 
 class Segment {
@@ -57,8 +59,8 @@ class Segment {
     std::map<std::string, ImportDeclaration> imports;
     std::vector<ImportItem> importRefs;
 
-    std::vector<SegmentArea> section;
-    std::vector<SegmentArea>::iterator currentSection = section.end();
+    SectionList sections;
+    SectionList::iterator currentSection = sections.end();
     int currentOffset;
 
     bool isPass2 = false;
@@ -89,6 +91,10 @@ public:
     void storeByte(uint8_t byt) { currentSection->objectCode.push_back(byt); }
     void pass2Setup();
     void addRelocationEntry(const Value& value, int operand_size, const Location& loc, const std::string& line_text);
+    SegmentHeader getSegmentHeader(StringTable &string_table);
+    SectionList& getSections() { return sections; }
+    std::map<std::string, ExportItem>& getExports() { return exports; }
+    std::vector<ImportItem>& getImportRefs() { return importRefs; }
 };
 
 

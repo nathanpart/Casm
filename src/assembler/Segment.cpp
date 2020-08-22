@@ -83,7 +83,7 @@ bool Segment::hasSymbol(const std::string& sym_name) {
 
 void Segment::enterSection(AlignType section_alignment, const Location &loc, const string &line) {
     unsigned start_offset;
-    if (currentSection != section.end()) {
+    if (currentSection != sections.end()) {
         if (currentSection->isBlock) {
             auto prev_section = currentSection - 1;
             start_offset = prev_section->startAddress + prev_section->size + currentSection->size;
@@ -133,9 +133,9 @@ void Segment::enterSection(AlignType section_alignment, const Location &loc, con
             throw CasmErrorException("Segment wrap around.", loc, line);
         }
 
-        section.push_back({static_cast<int>(start_offset), section_alignment, {}, 0, false});
+        sections.push_back({static_cast<int>(start_offset), section_alignment, {}, 0, false});
     }
-    currentSection = currentSection == section.end() ? section.begin() : currentSection + 1;
+    currentSection = currentSection == sections.end() ? sections.begin() : currentSection + 1;
     currentOffset = isPass2 ? currentSection->startAddress : static_cast<int>(start_offset);
 }
 
@@ -152,7 +152,7 @@ void Segment::assignSymbol(string &symbol_name, AsmState &state, Value &value) {
 
 void Segment::enterBlock(int block_address) {
     if (!isPass2) {
-        section.push_back({block_address, AlignType::byte, {}, 0, true});
+        sections.push_back({block_address, AlignType::byte, {}, 0, true});
     }
     currentSection++;
     currentOffset = block_address;
@@ -207,7 +207,7 @@ void Segment::endSegment(AsmState &state) {
 
 void Segment::pass2Setup() {
     isPass2 = true;
-    currentSection = section.end();
+    currentSection = sections.end();
 }
 
 void Segment::addRelocationEntry(const Value& value, int operand_size, const Location& loc, const string& line_text) {
@@ -255,4 +255,16 @@ void Segment::addRelocationEntry(const Value& value, int operand_size, const Loc
             currentSection->relocationTable.push_back({offset, value.baseValue, rel_type});
         }
     }
+}
+
+SegmentHeader Segment::getSegmentHeader(StringTable &string_table) {
+    auto sh = SegmentHeader();
+    sh.segmentNameStr = string_table.addString(name);
+    sh.baseAddress = baseAddress;
+    sh.type = static_cast<int>(type);
+    sh.alignment = static_cast<int>(alignType);
+    sh.exportCount = exports.size();
+    sh.importCount = importRefs.size();
+    sh.sectionCount = sections.size();
+    return sh;
 }

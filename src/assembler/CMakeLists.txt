@@ -22,6 +22,7 @@ target_sources(assembler
         Error.cpp
         groups.cpp
         Cpu.cpp
+        ObjectFile.cpp
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}/Line.h
         ${CMAKE_CURRENT_LIST_DIR}/Assembler.h
@@ -43,6 +44,7 @@ target_sources(assembler
         ${CMAKE_CURRENT_LIST_DIR}/SourceItem.h
         ${CMAKE_CURRENT_LIST_DIR}/Error.h
         ${CMAKE_CURRENT_LIST_DIR}/Cpu.h
+        ${CMAKE_CURRENT_LIST_DIR}/ObjectFile.h
 )
 
 target_include_directories(assembler

@@ -43,6 +43,7 @@ public:
     void pre_process(std::ifstream &source_stream, const std::string& name);
     void pass1();
     void pass2();
+    void writeObjectFile(const std::string &obj_file_name);
 };
 
 

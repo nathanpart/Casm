@@ -76,6 +76,7 @@ public:
     bool hasSymbol(const std::string& symbol_name);
     void storeByte(uint8_t byt);
     void addRelocationEntry(const Value& value, int operand_size, const Location& loc);
+    std::map<std::string, Segment> & getSegments() { return segments; }
 };
 
 
