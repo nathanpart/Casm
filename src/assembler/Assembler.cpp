@@ -131,6 +131,7 @@ void Assembler::pass2() {
 }
 
 void Assembler::writeObjectFile(const string &obj_file_name) {
+    if (errorCount > 0) return;
     if (!::writeObjectFile(obj_file_name, *state)) {
         cerr << "Unable to write object file " << obj_file_name << "\n";
     }
