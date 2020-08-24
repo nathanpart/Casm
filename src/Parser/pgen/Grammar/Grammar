@@ -1,5 +1,6 @@
-line: [label] [op_code | pseudo_op | variable | region | macro | include]  (NEWLINE|ENDMARKER)
+line: [label] [op_code | pseudo_op | variable | region | macro | include | external]  (NEWLINE|ENDMARKER)
 
+external: IMPORT extern_addr | EXPORT extern_addr
 label: NAME [ ':' | '?']
 variable: ('=' | EQU) exp
 region: SEGMENT [BYTE | WORD | DWORD | PARA | PAGE] [ABS | DP | ZP | STORAGE] [exp] | ENDS
@@ -39,6 +40,7 @@ ys_index: ',' (YREG | SREG)
 xys_index: ',' (XREG | YREG | SREG)
 
 symbol: NAME [(':' | '&') | '.' [NAME]] | '.' NAME
+extern_addr: NAME ['.' [NAME]] | '.' [NAME]
 
 exp: and_cond ('||' and_cond)*
 and_cond: not_cond ('&&' not_cond)*

@@ -75,6 +75,7 @@ public:
     void importSymbol(const std::string& local_name, std::string symbol_name, std::string seg_name,
                       Location &loc, AsmState &state);
     bool hasSymbol(const std::string& sym_name);
+    bool hasLabel(const std::string& sym_name) { return labelTable.hasLabel(sym_name); }
     [[nodiscard]] int getOffset() const {
         if (currentSection->isBlock) {
             return currentOffset + currentSection->startAddress;
@@ -95,6 +96,9 @@ public:
     SectionList& getSections() { return sections; }
     std::map<std::string, ExportItem>& getExports() { return exports; }
     std::vector<ImportItem>& getImportRefs() { return importRefs; }
+    [[nodiscard]] const std::string &getName() const {
+        return name;
+    }
 };
 
 

@@ -16,7 +16,7 @@
 #include "Instruction.h"
 
 
-enum class LineTypes { cpu, pseudo_op, variable, segment, macro, include};
+enum class LineTypes { cpu, pseudo_op, variable, segment, macro, include, external};
 
 struct ExpItem {
     Location loc;
@@ -46,7 +46,6 @@ struct Line {
     bool fromTree(node &tree);
 
     // Label field type queries
-    int getLength(AsmState &state) { return instruction->getSize(*this, state); }
     bool isLocalLabel() { return !label.empty() && label.back() == ':'; }
     bool isVariable() { return !label.empty() && label.back() == '&'; }
     [[nodiscard]] bool hasLabel() const { return !label.empty(); }

@@ -228,7 +228,9 @@ int eval_name(string &work_line, short &type, std::string &str, int &length) {
             { BLOCK, regex("^block", regex::icase)},
             { IFDEF, regex("^ifdef", regex::icase)},
             { IFNDEF, regex("^ifndef", regex::icase)},
-            { IF, regex("^if", regex::icase)}
+            { IF, regex("^if", regex::icase)},
+            { IMPORT, regex("^import", regex::icase)},
+            { EXPORT, regex("^export", regex::icase)}
     };
 
     static regex name_pattern("^[a-zA-Z_][a-zA-Z0-9_]*");

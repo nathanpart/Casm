@@ -37,7 +37,6 @@ class AsmState {
     std::map<std::string, SymbolXref> xrefs;
 
     int globalLine = 0;
-    int conditional_level = -1;
     std::vector<CondItem> conditions;
     std::map<int, CondItem> condition_starts;
     bool isActive = true;
@@ -65,7 +64,7 @@ public:
     void assignSymbol(std::string &name, Value &value);
     void doAlignment(AlignType &align_type, Location &loc);
     void enterBlock(int block_address) { currentSegment->enterBlock(block_address); }
-    bool inBlock() { inSegment() && currentSegment->inBlock(); }
+    bool inBlock() { return inSegment() && currentSegment->inBlock(); }
     void endBlock();
     void defineLabel();
     void allocateSpace(int size);
@@ -77,6 +76,11 @@ public:
     void storeByte(uint8_t byt);
     void addRelocationEntry(const Value& value, int operand_size, const Location& loc);
     std::map<std::string, Segment> & getSegments() { return segments; }
+    void importSymbol(const std::string& local_name, std::string& symbol_name, std::string& seg_name);
+    void exportSymbol(const std::string& label_name, const std::string& extern_name);
+
+    [[maybe_unused]] std::string getCurrentSegName();
+
 };
 
 

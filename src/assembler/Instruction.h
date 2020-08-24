@@ -25,6 +25,11 @@ protected:
     CpuMnemonics instruction;
     uint8_t opCode;
 
+    bool isImport = false;
+    std::string name1;
+    std::string name2;
+    bool hasDot = false;
+    bool isProcessed = false;
 public:
     static void createInstruction(node &inst_node, Line &asm_line);
     static void createGroup1(node &group_node, Line &asm_line);

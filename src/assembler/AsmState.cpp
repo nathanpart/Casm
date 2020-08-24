@@ -293,5 +293,35 @@ void AsmState::addRelocationEntry(const Value &value, int operand_size, const Lo
     currentSegment->addRelocationEntry(value, operand_size, loc, currentLine->lineText);
 }
 
+void AsmState::importSymbol(const string &local_name, std::string &symbol_name, std::string &seg_name) {
+    if (currentSegment == nullptr) {
+        throw CasmErrorException("Cannot import outside of a segment.", currentLine->instructionLoc,
+                                 currentLine->lineText);
+    }
+    currentSegment->importSymbol(local_name, symbol_name, seg_name, currentLine->instructionLoc, *this);
+}
+
+[[maybe_unused]] std::string AsmState::getCurrentSegName() {
+    if (currentSegment == nullptr) {
+        throw CasmErrorException("Not in a segment.", currentLine->instructionLoc,
+                                 currentLine->lineText);
+    }
+
+    return currentSegment->getName();
+}
+
+void AsmState::exportSymbol(const string &label_name, const std::string& extern_name) {
+    if (currentSegment == nullptr) {
+        throw CasmErrorException("Not in a segment.", currentLine->instructionLoc,
+                                 currentLine->lineText);
+    }
+    Value value;
+    if (!(currentSegment->hasLabel(label_name) && currentSegment->resolveSymbol(label_name, value, *this))) {
+        throw CasmErrorException("Label is undefined.", currentLine->instructionLoc,
+                                 currentLine->lineText);
+    }
+    currentSegment->exportSymbol(extern_name, value.value);
+}
+
 
 
