@@ -31,7 +31,7 @@ struct Line {
     Location labelLoc;
 
     LineTypes lineType = LineTypes::cpu;
-    std::unique_ptr<Instruction> instruction;
+    std::shared_ptr<Instruction> instruction;
     Location instructionLoc;
     AddressModes addressMode = AddressModes::unknown;
     int size = 0;

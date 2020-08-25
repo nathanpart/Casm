@@ -16,14 +16,15 @@ enum class SourceType {MAIN_FILE, INCLUDE, MACRO_EXPANSION};
 
 class SourceItem {
     Location location;
-    std::unique_ptr<tokenizer> sourceTokenizer;
+    std::shared_ptr<tokenizer> sourceTokenizer;
     SourceType sourceType;
-    std::unique_ptr<std::istream> sourceStream;
+    std::shared_ptr<std::istream> sourceStream;
     bool eofFlag = false;
 
 public:
     SourceItem(std::ifstream &file, const std::string &fileName, SourceType type);
     SourceItem(const std::string& source, std::string sourceTitle, SourceType type, int firstLine = 1);
+    SourceItem(const SourceItem& si);
 
     // returns parse_tree, error_code, line_text, source_name
     std::tuple<std::shared_ptr<node>, std::string> getParsedLine();

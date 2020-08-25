@@ -19,6 +19,7 @@ using namespace std;
 
 
 Assembler::Assembler() {
+    cpuInstrMapInit();
     state = make_unique<AsmState>();
 }
 

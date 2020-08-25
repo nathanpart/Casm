@@ -22,7 +22,7 @@ void Instruction::createGroup1(node &group_node, Line &asm_line) {
     bool isIndirectLong = false;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (auto& child_node: group_node.child) {
         node *work_ptr = &child_node;
@@ -77,7 +77,7 @@ void Instruction::createGroup1(node &group_node, Line &asm_line) {
         }
     }
 
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
 
     // Set the addressing mode
     if (asm_line.addressMode == AddressModes::unknown) {
@@ -137,7 +137,7 @@ void Instruction::createGroup2(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (group_node.type) {
@@ -165,7 +165,7 @@ void Instruction::createGroup2(node &group_node, Line &asm_line) {
 
     }
 
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
 
     if (!hasOperand || hasAreg) {
         asm_line.addressMode = AddressModes::acc;
@@ -185,7 +185,7 @@ void Instruction::createGroup3(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -233,7 +233,7 @@ void Instruction::createGroup3(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
 }
 
 
@@ -242,7 +242,7 @@ void Instruction::createGroup4(node &group_node, Line &asm_line) {
     string inst;
     bool hasXIndex = false;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -283,7 +283,7 @@ void Instruction::createGroup4(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     if (asm_line.addressMode != AddressModes::imm) {
         if (asm_line.hasDpZp) {
             asm_line.addressMode = hasXIndex ? AddressModes::dp_x : AddressModes::dp;
@@ -298,7 +298,7 @@ void Instruction::createGroup5(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -335,7 +335,7 @@ void Instruction::createGroup5(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     if (asm_line.addressMode != AddressModes::imm) {
         asm_line.addressMode = asm_line.hasDpZp ? AddressModes::dp : AddressModes::abs;
     }
@@ -345,7 +345,7 @@ void Instruction::createGroup6(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -372,14 +372,14 @@ void Instruction::createGroup6(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
 }
 
 void Instruction::createGroup7(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -401,7 +401,7 @@ void Instruction::createGroup7(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
 }
 
 
@@ -411,7 +411,7 @@ void Instruction::createGroup8(node &group_node, Line &asm_line) {
     bool hasXIndex;
     bool hasSIndex;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (auto& child_node: group_node.child) {
         node *exp_node = &child_node;
@@ -437,7 +437,7 @@ void Instruction::createGroup8(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
 
     if (isIndirect) {
         if (asm_line.hasLong) {
@@ -463,7 +463,7 @@ void Instruction::createGroup10(node &group_node, Line &asm_line) {
     bool isIndirect = false;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (auto& child_node: group_node.child) {
         node *exp_node = &child_node;
@@ -495,14 +495,14 @@ void Instruction::createGroup10(node &group_node, Line &asm_line) {
     else {
         asm_line.addressMode = asm_line.hasLong ? AddressModes::abs_long : AddressModes::abs;
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
 }
 
 void Instruction::createGroup11(node &group_node, Line &asm_line) {
     Expression expression;
     bool hasYIndex = false;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -540,7 +540,7 @@ void Instruction::createGroup11(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     if (asm_line.addressMode != AddressModes::imm) {
         if (asm_line.hasDpZp) {
             asm_line.addressMode = hasYIndex ? AddressModes::dp_y : AddressModes::dp;
@@ -555,7 +555,7 @@ void Instruction::createGroup12(node &group_node, Line &asm_line) {
     Expression expression;
     bool hasYIndex = false;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -576,7 +576,7 @@ void Instruction::createGroup12(node &group_node, Line &asm_line) {
 
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     if (asm_line.hasDpZp) {
         asm_line.addressMode = hasYIndex ? AddressModes::dp_y : AddressModes::dp;
     }
@@ -590,7 +590,7 @@ void Instruction::createGroup13(node &group_node, Line &asm_line) {
     bool hasXIndex = false;
     string inst;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -610,7 +610,7 @@ void Instruction::createGroup13(node &group_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     if (asm_line.hasDpZp) {
         asm_line.addressMode = hasXIndex ? AddressModes::dp_x : AddressModes::dp;
     }
@@ -621,11 +621,11 @@ void Instruction::createGroup13(node &group_node, Line &asm_line) {
 }
 
 void Instruction::createGroup14(node &group_node, Line &asm_line) {
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
     const auto& child_node = group_node.child[0];
     smatch results;
     cpu_instr->setInstruction(child_node.str);
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     asm_line.addressMode = AddressModes::imp;
 }
 
@@ -635,7 +635,7 @@ void Instruction::createGroup15(node &group_node, Line &asm_line) {
     bool hasXIndex;
     bool hasSIndex;
 
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
     cpu_instr->setInstruction(group_node.str);
     node *exp_node = &group_node.child[1];
     isIndirect = isExpTreeIndirect(exp_node, hasXIndex, hasSIndex);
@@ -655,16 +655,16 @@ void Instruction::createGroup15(node &group_node, Line &asm_line) {
         }
         asm_line.addressMode = AddressModes::dp;
     }
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     asm_line.expressionList.push_back({exp_node->location, expression});
 }
 
 void Instruction::createGroup16(node &group_node, Line &asm_line) {
     Expression expression;
     smatch results;
-    auto *cpu_instr = new Instruction();
+    auto cpu_instr = make_shared<Instruction>();
     cpu_instr->setInstruction(group_node.child.front().str);
-    asm_line.instruction = unique_ptr<Instruction>(cpu_instr);
+    asm_line.instruction = cpu_instr;
     const auto& exp_node = group_node.child.back();
     if (exp_node.type == exp) {
         expression.buildRpnList(exp_node, asm_line.lineText);

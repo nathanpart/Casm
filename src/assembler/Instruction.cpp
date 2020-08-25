@@ -22,7 +22,7 @@ using namespace std;
 void Instruction::createInstruction(node &inst_node, Line &asm_line) {
     node &child = inst_node.child.front();
     Expression expression;
-    Instruction *instr;
+    auto instr = make_shared<Instruction>();
     switch (inst_node.type) {
         case op_code:
             asm_line.lineType = LineTypes::cpu;
@@ -106,7 +106,6 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
             break;
 
         case external:
-            instr = new Instruction();
             asm_line.lineType = LineTypes::external;
             if (child.type == IMPORT) {
                 instr->isImport = true;
@@ -126,7 +125,7 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
                     }
                 }
             }
-            asm_line.instruction = unique_ptr<Instruction>(instr);
+            asm_line.instruction = instr;
     }
 }
 

@@ -6,6 +6,7 @@
       <w>asciiz</w>
       <w>atequal</w>
       <w>casm</w>
+      <w>cobj</w>
       <w>coloncolon</w>
       <w>colonequal</w>
       <w>doubleslash</w>

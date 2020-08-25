@@ -5,8 +5,18 @@
 #include <sstream>
 #include "Macro.h"
 #include "Assembler.h"
+#include "SourceItem.h"
+#include "Error.h"
 
 using namespace std;
+
+std::regex Macro::endm_pat;
+std::regex Macro::mac;
+std::regex Macro::expand_pat;
+std::regex Macro::arg_pat;
+int Macro::expansion_count;  // counter to catch runaway recursive macro expansion
+
+
 
 void Macro::addNested(SourceItem &source, const std::string& root_name) {
     if (nestedMacros.count(root_name) > 0) {

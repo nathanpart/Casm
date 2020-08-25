@@ -47,6 +47,11 @@ target_sources(assembler
         ${CMAKE_CURRENT_LIST_DIR}/ObjectFile.h
 )
 
+target_link_libraries(assembler PUBLIC
+        parser
+)
+
+
 target_include_directories(assembler
     PUBLIC
         ${CMAKE_CURRENT_LIST_DIR}

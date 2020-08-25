@@ -8,16 +8,9 @@
 
 using namespace std;
 
-int MacroLine::getSize(Line &Line, AsmState &state) {
-    return 0;
-}
-
-void MacroLine::getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) {
-
-}
 
 void MacroLine::createInstruction(node &macro_node, Line &asm_line) {
-    auto *macro = new MacroLine();
+    auto macro = make_shared<MacroLine>(MacroLine());
 
     for (const auto& mac_node: macro_node.child) {
         switch (mac_node.type) {
@@ -37,5 +30,5 @@ void MacroLine::createInstruction(node &macro_node, Line &asm_line) {
                 break;
         }
     }
-    asm_line.instruction = unique_ptr<Instruction>(macro);
+    asm_line.instruction = macro;
 }

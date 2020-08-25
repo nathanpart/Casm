@@ -8,6 +8,7 @@
 #include "SourceItem.h"
 #include "../Parser/Parser.h"
 #include "../Parser/errcode.h"
+#include "Error.h"
 
 using namespace std;
 
@@ -16,8 +17,8 @@ SourceItem::SourceItem(ifstream &file, const string &fileName, SourceType type) 
     location.lineNumber = 0;
     location.column = 0;
     sourceType = type;
-    sourceStream = make_unique<istream>(file.rdbuf());
-    sourceTokenizer = make_unique<tokenizer>(*sourceStream);
+    sourceStream = make_shared<istream>(file.rdbuf());
+    sourceTokenizer = make_shared<tokenizer>(*sourceStream);
 }
 
 SourceItem::SourceItem(const string& source, string sourceTitle, SourceType type, int firstLine) {
@@ -25,8 +26,16 @@ SourceItem::SourceItem(const string& source, string sourceTitle, SourceType type
     location.lineNumber = firstLine;
     location.column = 0;
     sourceType = type;
-    sourceStream = make_unique<istream>(istringstream(source).rdbuf());
-    sourceTokenizer = make_unique<tokenizer>(*sourceStream);
+    sourceStream = make_shared<istream>(istringstream(source).rdbuf());
+    sourceTokenizer = make_shared<tokenizer>(*sourceStream);
+}
+
+SourceItem::SourceItem(const SourceItem& si) {
+    location = si.location;
+    sourceTokenizer = si.sourceTokenizer;
+    sourceType = si.sourceType;
+    sourceStream = si.sourceStream;
+    eofFlag = si.eofFlag;
 }
 
 tuple<shared_ptr<node>, string> SourceItem::getParsedLine() {
@@ -84,3 +93,5 @@ std::string SourceItem::getLine() {
 
     return line_text;
 }
+
+

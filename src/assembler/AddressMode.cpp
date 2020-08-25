@@ -102,6 +102,7 @@ int getAddressModeSize(AddressModes mode, AsmState &state, char imm_operand_size
         case AddressModes::abs_long_x:
             return 3;
     }
+    return 0;
 }
 
 void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {

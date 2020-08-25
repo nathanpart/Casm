@@ -20,11 +20,12 @@
 #include "Line.h"
 #include "Location.h"
 #include "Macro.h"
-
+#include "SourceItem.h"
 
 
 class AsmState;
 struct Value;
+
 
 class Assembler {
     std::stack<SourceItem> sourceStack;

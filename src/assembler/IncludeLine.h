@@ -9,7 +9,7 @@
 
 #include "Instruction.h"
 
-class IncludeLine : Instruction {
+class IncludeLine : public Instruction {
     std::string fileName;
 
 public:

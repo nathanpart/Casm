@@ -2,6 +2,7 @@
 // Created by nathan on 8/3/20.
 //
 
+
 #include "Line.h"
 #include "PseudoOp.h"
 #include "../Parser/token.h"
@@ -19,7 +20,7 @@ static void addExpr(const node &n, Line &asm_line, bool is_child = true) {
 }
 
 void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
-    auto *op = new PseudoOp();
+    auto op = make_shared<PseudoOp>(PseudoOp());
     switch (pseudo_node.type) {
         case CPU6502:
         case CPU65C02:
@@ -102,7 +103,7 @@ void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
             addExpr(pseudo_node, asm_line);
             break;
     }
-    asm_line.instruction = unique_ptr<Instruction>(op);
+    asm_line.instruction = op;
 }
 
 

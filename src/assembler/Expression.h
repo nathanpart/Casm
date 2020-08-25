@@ -8,6 +8,7 @@
 #include <variant>
 #include <string>
 #include <vector>
+#include <stack>
 #include <optional>
 
 #include "Location.h"

@@ -18,8 +18,6 @@ class MacroLine : public Instruction {
 
 public:
     static void createInstruction(node &macro_node, Line &asm_line);
-    int getSize(Line &Line, AsmState &state) override;
-    void getObjectCode(uint8_t *ptr, Line &Line, AsmState &state) override;
     [[nodiscard]] bool isDef() const {
         return isDefinition;
     }
@@ -29,7 +27,7 @@ public:
     }
 
     std::vector<std::string> getArgs() {
-
+        return argumentList;
     }
 
 };

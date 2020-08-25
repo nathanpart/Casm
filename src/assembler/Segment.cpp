@@ -4,9 +4,9 @@
 
 #include <utility>
 #include <string>
+#include <stack>
 
 #include "Segment.h"
-#include "Assembler.h"
 #include "AsmState.h"
 #include "Line.h"
 #include "Error.h"
