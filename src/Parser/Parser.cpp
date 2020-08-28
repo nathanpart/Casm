@@ -31,7 +31,7 @@ int ParserStack::ppush(short type, const dfa *d, int newState, Location loc) {
         return err;
     }
     top().i_state = newState;
-    push(StackEntry(d, n.get_child(n.num_children - 1)));
+    push(StackEntry(d, n.get_child(n.child.size() - 1)));
     return 0;
 }
 

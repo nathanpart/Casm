@@ -18,15 +18,14 @@ public:
     short type;
     std::string str;
     Location location;
-    int num_children;
     std::vector<node> child;
     std::vector<int> foo;
 
-    node() : type(0), num_children(0) {}
-    explicit node(short type) : type(type), num_children(0)  {}
+    node() : type(0) {}
+    explicit node(short type) : type(type)  {}
 
-    node(short type, std::string str, Location loc, int num_children)
-        : type(type), str(std::move(str)), location(loc), num_children(num_children) {}
+    node(short type, std::string str, Location loc)
+        : type(type), str(std::move(str)), location(loc) {}
 
     [[nodiscard]] int get_num_children() const {
         return child.size();

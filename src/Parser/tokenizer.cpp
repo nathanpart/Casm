@@ -34,7 +34,6 @@ int tokenizer::getToken(short &type, std::string &str, std::string &line_str, in
 
 
     line_str = line;
-    start_col = column;
     string work_str = line.substr(column);   // Get the remaining untokenized part of the line.
 
     smatch results;
@@ -44,6 +43,7 @@ int tokenizer::getToken(short &type, std::string &str, std::string &line_str, in
         column += results.length();
         work_str = line.substr(column);
     }
+    start_col = column;
 
     // Check to see if we hit the end of current line also for comments
     if (work_str.empty() || work_str[0] == ';' || (work_str[0] == '*' && column == 0)) {
@@ -90,8 +90,8 @@ int tokenizer::fetchLine(short &type, std::string &str, std::string &line_str, i
 int eval_numeric(string &work_line, short &type, string &str, int &length) {
     static regex dec_pattern("^[1-9][0-9]*");
     static regex oct_pattern("^0[0-7]*");
-    static regex bin_pattern("^%[01]*");
-    static regex hex_pattern("^\\$[0-9a-fA-F");
+    static regex bin_pattern("^%[01]+");
+    static regex hex_pattern("^\\$[0-9a-fA-F]+");
 
     smatch results;
     if (not regex_search(work_line, results, dec_pattern))
@@ -204,7 +204,7 @@ int eval_name(string &work_line, short &type, std::string &str, int &length) {
             { SHORT, regex("^short", regex::icase)},
             { LONG, regex("^long", regex::icase)},
             { DP, regex("^dp", regex::icase)},
-            { ZP, regex("^ap", regex::icase)},
+            { ZP, regex("^zp", regex::icase)},
             { AREG, regex("^a", regex::icase)},
             { XREG, regex("^x", regex::icase)},
             { YREG, regex("^y", regex::icase)},

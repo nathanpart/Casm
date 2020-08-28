@@ -12,7 +12,7 @@ void node::listTree() const {
 }
 
 int node::addChild(short child_type, string child_str, Location loc) {
-    node n = node(child_type, std::move(child_str), std::move(loc), 0);
+    node n = node(child_type, std::move(child_str), std::move(loc));
     child.push_back(n);
     return 0;
 }

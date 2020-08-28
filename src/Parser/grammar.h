@@ -45,8 +45,8 @@ struct dfa {
     state      *d_state;
     const char *d_first;
     [[nodiscard]] bool testBit(int ibit) const {
-        return (static_cast<unsigned>(d_first[ibit / sizeof(char)]) &
-            (static_cast<unsigned >(1) << ibit % sizeof(char))) != 0;
+        return (static_cast<unsigned>(d_first[ibit / (sizeof(char) * 8)]) &
+            1u << ibit % (sizeof(char) * 8)) != 0;
     }
 
 };

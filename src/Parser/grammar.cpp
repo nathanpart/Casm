@@ -6,12 +6,18 @@
 #include "grammar.h"
 #include "token.h"
 
+using namespace std;
+
 void grammar::fixdfa(const dfa *d) {
+    //cout << "Processing " << d->name << ".\n";
+
     state *s;
     int j;
     s = d->d_state;
-    for (j = 0; j < d->d_nstates; j++, s++)
+    for (j = 0; j < d->d_nstates; j++, s++) {
+        //cout << "   state " << j + 1 << " out of " << d->d_nstates << ".\n";
         fixstate(s);
+    }
 }
 
 #pragma clang diagnostic push
@@ -45,7 +51,7 @@ void grammar::fixstate(state *s) const {
             for (ibit = 0; ibit < g_ll.ll_nlabels; ibit++) {
                 if (d1->testBit(ibit)) {
                     if (accel[ibit] != -1)
-                        std::cout << "XXX ambiguity!\n";
+                        std::cout << "XXX ambiguity! - " << d1->name << " " << ibit << ".\n";
                     accel[ibit] = a->a_arrow | (1 << 7) | ((type - NT_OFFSET) << 8);
                 }
             }
@@ -61,7 +67,7 @@ void grammar::fixstate(state *s) const {
         k++;
     if (k < nl) {
         int i;
-        s->s_accel = new int[nl = k];
+        s->s_accel = new int[nl - k];
         s->s_lower = k;
         s->s_upper = nl;
         for (i = 0; k < nl; i++, k++)
