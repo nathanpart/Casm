@@ -20,7 +20,7 @@ static void addExpr(const node &n, Line &asm_line, bool is_child = true) {
 }
 
 void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
-    auto op = make_shared<PseudoOp>(PseudoOp());
+    auto op = make_shared<PseudoOp>(PseudoOp(*asm_line.state));
     switch (pseudo_node.type) {
         case CPU6502:
         case CPU65C02:
@@ -107,54 +107,56 @@ void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
 }
 
 
-void PseudoOp::pass1(Line &asm_line, AsmState &state) {
+void PseudoOp::pass1() {
+    auto asm_line = state.getCurrentLine();
     int pseudo_op_size = 0;
     ExpValue value_opt;
     Location loc;
-    if (processConditionals(asm_line, state))
+    if (processConditionals(*asm_line, state))
         return;
     if (!state.getActiveFlag())
         return;
+
     if (processFlags(state)) {
-        state.defineLabel();
+        defineLabel();
         return;
     }
     switch (pseudoOp) {
         case ALIGN:
-            state.defineLabel();
+            defineLabel();
             if (!state.inSegment()) {
-                throw CasmErrorException("Not in a segment.", asm_line.instructionLoc, asm_line.lineText);
+                throw CasmErrorException("Not in a segment.", asm_line->instructionLoc, asm_line->lineText);
             }
-            state.doAlignment(alignType, asm_line.instructionLoc);
+            state.doAlignment(alignType, asm_line->instructionLoc);
             break;
         case BLOCK:
-            state.defineLabel();
-            value_opt = asm_line.expressionList.front().exp.getValue(state);
+            defineLabel();
+            value_opt = asm_line->expressionList.front().exp.getValue(state);
             if (!value_opt) {
                 throw CasmErrorException("Block's destination address not known on pass 1.",
-                                         asm_line.expressionList.front().loc, asm_line.lineText);
+                                         asm_line->expressionList.front().loc, asm_line->lineText);
             }
             if (value_opt->type != ValueType::absolute || value_opt->external) {
                 throw CasmErrorException("Block's target expression cannot be external or relocatable.",
-                                         asm_line.expressionList.front().loc, asm_line.lineText);
+                                         asm_line->expressionList.front().loc, asm_line->lineText);
             }
             if (state.inBlock()) {
                 throw CasmErrorException("Blocks cannot be nested.",
-                                         asm_line.instructionLoc, asm_line.lineText);
+                                         asm_line->instructionLoc, asm_line->lineText);
             }
             state.enterBlock(value_opt->value);
             break;
         case END_BLOCK:
-            state.defineLabel();
+            defineLabel();
             if (!state.inBlock()) {
                 throw CasmErrorException("Not currently in a BLOCK.",
-                                         asm_line.instructionLoc, asm_line.lineText);
+                                         asm_line->instructionLoc, asm_line->lineText);
             }
             state.endBlock();
             break;
         case DB:
-            state.defineLabel();
-            for (auto &exp_item: asm_line.expressionList) {
+            defineLabel();
+            for (auto &exp_item: asm_line->expressionList) {
                 auto string_opt = exp_item.exp.getString(state);
                 pseudo_op_size += string_opt ? static_cast<int>(string_opt->length()) : 1;
             }
@@ -163,74 +165,75 @@ void PseudoOp::pass1(Line &asm_line, AsmState &state) {
         case DW:
         case DBW:
         case DA:
-            state.defineLabel();
-            state.allocateSpace(static_cast<int>(asm_line.expressionList.size()) * 2);
+            defineLabel();
+            state.allocateSpace(static_cast<int>(asm_line->expressionList.size()) * 2);
             break;
         case DS:
-            value_opt = asm_line.expressionList.front().exp.getValue(state);
-            loc = asm_line.expressionList.front().loc;
+            value_opt = asm_line->expressionList.front().exp.getValue(state);
+            loc = asm_line->expressionList.front().loc;
             if (!value_opt) {
                 throw CasmErrorException("Unable to evaluate operand for DS on pass 1.",
-                                         loc, asm_line.lineText);
+                                         loc, asm_line->lineText);
             }
             if (value_opt->type != ValueType::absolute || value_opt->external) {
-                throw CasmErrorException("Operand for DS cannot be a relocatable.", loc, asm_line.lineText);
+                throw CasmErrorException("Operand for DS cannot be a relocatable.", loc, asm_line->lineText);
             }
             if (value_opt->value < 0) {
-                throw CasmErrorException("operand for DS cannot be negative.", loc, asm_line.lineText);
+                throw CasmErrorException("operand for DS cannot be negative.", loc, asm_line->lineText);
             }
-            state.defineLabel();
+            defineLabel();
             state.allocateSpace(value_opt->value);
             break;
     }
 }
 
-void PseudoOp::pass2(Line &asm_line, AsmState &state) {
+void PseudoOp::pass2() {
+    auto asm_line = state.getCurrentLine();
     ExpValue value_opt;
     Location loc;
-    if (processConditionals(asm_line, state))
+    if (processConditionals(*asm_line, state))
         return;
     if (!state.getActiveFlag())
         return;
     if (processFlags(state)) {
-        state.defineLabel();
+        defineLabel();
         return;
     }
     switch (pseudoOp) {
         case ALIGN:
             if (!state.inSegment()) {
-                throw CasmErrorException("Not in a segment.", asm_line.instructionLoc, asm_line.lineText);
+                throw CasmErrorException("Not in a segment.", asm_line->instructionLoc, asm_line->lineText);
             }
-            state.doAlignment(alignType, asm_line.instructionLoc);
+            state.doAlignment(alignType, asm_line->instructionLoc);
             break;
         case BLOCK:
-            value_opt = asm_line.expressionList.front().exp.getValue(state);
+            value_opt = asm_line->expressionList.front().exp.getValue(state);
             if (!value_opt) {
                 throw CasmErrorException("Block's destination address not known on pass 2.",
-                                         asm_line.expressionList.front().loc, asm_line.lineText);
+                                         asm_line->expressionList.front().loc, asm_line->lineText);
             }
             if (value_opt->type != ValueType::absolute || value_opt->external) {
                 throw CasmErrorException("Block's target expression cannot be external or relocatable.",
-                                         asm_line.expressionList.front().loc, asm_line.lineText);
+                                         asm_line->expressionList.front().loc, asm_line->lineText);
             }
             if (state.inBlock()) {
                 throw CasmErrorException("Blocks cannot be nested.",
-                                         asm_line.instructionLoc, asm_line.lineText);
+                                         asm_line->instructionLoc, asm_line->lineText);
             }
             state.enterBlock(value_opt->value);
             break;
         case END_BLOCK:
             if (!state.inBlock()) {
                 throw CasmErrorException("Not currently in a BLOCK.",
-                                         asm_line.instructionLoc, asm_line.lineText);
+                                         asm_line->instructionLoc, asm_line->lineText);
             }
             state.endBlock();
             break;
         case DB:
-            for (auto &exp_item: asm_line.expressionList) {
+            for (auto &exp_item: asm_line->expressionList) {
                 auto string_opt = exp_item.exp.getString(state);
                 if (!string_opt) {
-                    storeByte(exp_item, asm_line, state);
+                    storeByte(exp_item, *asm_line, state);
                 }
                 else {
                     for(auto& ch: *string_opt) {
@@ -240,32 +243,32 @@ void PseudoOp::pass2(Line &asm_line, AsmState &state) {
             }
             break;
         case DW:
-            for (auto &exp_item: asm_line.expressionList) {
-                storeAbsolute(exp_item, asm_line, state);
+            for (auto &exp_item: asm_line->expressionList) {
+                storeAbsolute(exp_item, *asm_line, state);
             }
             break;
         case DBW:
-            for (auto &exp_item: asm_line.expressionList) {
-                storeAbsolute(exp_item, asm_line, state, true);
+            for (auto &exp_item: asm_line->expressionList) {
+                storeAbsolute(exp_item, *asm_line, state, true);
             }
             break;
         case DA:
-            for (auto &exp_item: asm_line.expressionList) {
-                storeAbsolute(exp_item, asm_line, state, false, true);
+            for (auto &exp_item: asm_line->expressionList) {
+                storeAbsolute(exp_item, *asm_line, state, false, true);
             }
             break;
         case DS:
-            value_opt = asm_line.expressionList.front().exp.getValue(state);
-            loc = asm_line.expressionList.front().loc;
+            value_opt = asm_line->expressionList.front().exp.getValue(state);
+            loc = asm_line->expressionList.front().loc;
             if (!value_opt) {
                 throw CasmErrorException("Unable to evaluate operand for DS on pass 2.",
-                                         loc, asm_line.lineText);
+                                         loc, asm_line->lineText);
             }
             if (value_opt->type != ValueType::absolute || value_opt->external) {
-                throw CasmErrorException("Operand for DS cannot be a relocatable.", loc, asm_line.lineText);
+                throw CasmErrorException("Operand for DS cannot be a relocatable.", loc, asm_line->lineText);
             }
             if (value_opt->value < 0) {
-                throw CasmErrorException("operand for DS cannot be negative.", loc, asm_line.lineText);
+                throw CasmErrorException("operand for DS cannot be negative.", loc, asm_line->lineText);
             }
             for (int i=0; i < value_opt->value; i++) {
                 state.storeByte(0);

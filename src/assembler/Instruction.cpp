@@ -22,7 +22,7 @@ using namespace std;
 void Instruction::createInstruction(node &inst_node, Line &asm_line) {
     node &child = inst_node.child.front();
     Expression expression;
-    auto instr = make_shared<Instruction>();
+    auto instr = make_shared<Instruction>(*asm_line.state);
     switch (inst_node.type) {
         case op_code:
             asm_line.lineType = LineTypes::cpu;
@@ -85,7 +85,7 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
 
         case variable:
             asm_line.lineType = LineTypes::variable;
-            asm_line.instruction = unique_ptr<Instruction>(new Variable);
+            asm_line.instruction = unique_ptr<Instruction>(new Variable(*asm_line.state));
             expression.buildRpnList(inst_node.child.back(), asm_line.lineText);
             asm_line.expressionList.push_back({inst_node.child.back().location, expression});
             break;
@@ -129,29 +129,34 @@ void Instruction::createInstruction(node &inst_node, Line &asm_line) {
     }
 }
 
-void Instruction::pass1(Line &asm_line, AsmState &state) {
-    if (asm_line.lineType == LineTypes::cpu) {
+void Instruction::pass1() {
+    auto asm_line = state.getCurrentLine();
+    auto segment = state.getCurrentSegment();
+
+    if (asm_line->lineType == LineTypes::cpu) {
 
         if (cpus.count(state.cpuType) == 0) {
             throw CasmErrorException("The currently selected cpu does not support this instruction",
-                                     asm_line.instructionLoc, asm_line.lineText);
+                                     asm_line->instructionLoc, asm_line->lineText);
         }
         uint8_t cpu_op;
         set<CpuType> cpu_type;
 
-        auto addr_mode_rec = opCodes->at(asm_line.addressMode);
+        auto addr_mode_rec = opCodes->at(asm_line->addressMode);
         tie(cpu_op, cpu_type) = addr_mode_rec;
         if (cpu_type.count(state.cpuType) == 0) {
             throw CasmErrorException("The currently selected cpu does not support this address mode.",
-                                     asm_line.instructionLoc, asm_line.lineText);
+                                     asm_line->instructionLoc, asm_line->lineText);
         }
         opCode = cpu_op;
-        state.defineLabel();
-        state.allocateSpace(getAddressModeSize(asm_line.addressMode, state, immType) + 1);
+        if (asm_line->hasLabel()) {
+            segment->defineLabel(asm_line->label);
+        }
+        state.allocateSpace(getAddressModeSize(asm_line->addressMode, state, immType) + 1);
     }
-    else if (asm_line.lineType == LineTypes::external) {
+    else if (asm_line->lineType == LineTypes::external) {
         if (isImport) {
-            if (asm_line.label.empty()) {
+            if (asm_line->label.empty()) {
                 if (!name1.empty() || !hasDot) {
                     state.importSymbol(name1, name1, name2);
                 }
@@ -160,31 +165,33 @@ void Instruction::pass1(Line &asm_line, AsmState &state) {
                 }
             }
             else {
-                if (!asm_line.normalLabel()) {
-                    throw CasmErrorException("Label cannot be local or variable.", asm_line.labelLoc,
-                                             asm_line.lineText);
+                if (!asm_line->normalLabel()) {
+                    throw CasmErrorException("Label cannot be local or variable.", asm_line->labelLoc,
+                                             asm_line->lineText);
                 }
-                state.importSymbol(asm_line.label, name1, name2);
+                state.importSymbol(asm_line->label, name1, name2);
             }
         }
     }
 }
 
-void Instruction::pass2(Line & asm_line, AsmState & state) {
-    if (asm_line.lineType == LineTypes::cpu) {
+void Instruction::pass2() {
+    auto asm_line = state.getCurrentLine();
+
+    if (asm_line->lineType == LineTypes::cpu) {
         state.storeByte(opCode);
-        writeOperand(asm_line.addressMode, state, immType);
+        writeOperand(asm_line->addressMode, state, immType);
     }
-    else if (asm_line.lineType == LineTypes::external && !isImport){
+    else if (asm_line->lineType == LineTypes::external && !isImport){
         if (hasDot) {
-            throw CasmErrorException("Cannot export reference to another segment.", asm_line.instructionLoc,
-                                     asm_line.lineText);
+            throw CasmErrorException("Cannot export reference to another segment.", asm_line->instructionLoc,
+                                     asm_line->lineText);
         }
-        if (asm_line.hasLabel() && !asm_line.normalLabel()) {
-            throw CasmErrorException("Label cannot be local or variable.", asm_line.labelLoc,
-                                     asm_line.lineText);
+        if (asm_line->hasLabel() && !asm_line->normalLabel()) {
+            throw CasmErrorException("Label cannot be local or variable.", asm_line->labelLoc,
+                                     asm_line->lineText);
         }
-        state.exportSymbol(name1, asm_line.hasLabel() ? asm_line.label : name1);
+        state.exportSymbol(name1, asm_line->hasLabel() ? asm_line->label : name1);
     }
 }
 

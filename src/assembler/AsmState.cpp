@@ -14,7 +14,7 @@ using namespace std;
 bool AsmState::resolveSymbol(const string& symbol_name, Value &value, Location &loc) {
     auto dot_loc = symbol_name.find('.');
     if (dot_loc == string::npos && currentSegment != nullptr) {
-        bool success = currentSegment->resolveSymbol(symbol_name, value, *this);
+        bool success = currentSegment->resolveSymbol(symbol_name, value);
         if (!success && isPassTwo) {
             throw CasmErrorException("Symbol not found.", loc, currentLine->lineText);
         }
@@ -44,14 +44,15 @@ bool AsmState::resolveSymbol(const string& symbol_name, Value &value, Location &
             }
             return false;
         }
+        auto& [name, segment] = *seg_iter;
         if (!offset_name.empty()) {
-            bool success = seg_iter->second.resolveSymbol(offset_name, value, *this);
+            bool success = segment.resolveSymbol(offset_name, value);
             if (success && value.isRelocatable()) {
                 if (currentSegment == nullptr) {
                     throw CasmErrorException("Cannot import an exportable to global scope.",
                                              loc, currentLine->lineText);
                 }
-                seg_iter->second.exportSymbol(offset_name, value.value);
+                segment.exportSymbol(offset_name, value.value);
                 value.external = true;
                 value.externalName = offset_name;
                 value.externalSeg = seg_name;
@@ -92,40 +93,9 @@ int AsmState::getCurrentOffset(Location &loc) {
     return currentSegment->getOffset();
 }
 
-void AsmState::pass1(Line &line) {
-    globalLine++;
-    currentLine = &line;
-
-    if (isActive) {
-        if (line.instruction == nullptr && !currentLine->label.empty()) {
-            if (currentSegment != nullptr) {
-                defineLabel();
-            }
-            else {
-                throw CasmErrorException("Not currently in a segment.",
-                                         currentLine->labelLoc, currentLine->lineText);
-            }
-        }
-        line.instruction->pass1(line, *this);
-    }
-    else {
-        if (line.lineType == LineTypes::pseudo_op) {
-            line.instruction->pass1(line, *this);
-        }
-    }
-}
-
-void AsmState::pass2(Line &line) {
-    globalLine++;
-    currentLine = &line;
-    if (isActive || line.lineType == LineTypes::pseudo_op) {
-        line.instruction->pass2(line, *this);
-    }
-}
-
 void AsmState::pass2Setup() {
     globalLine = 0;
-    isActive = true;   // Should already be true if the conditions.empty check passes
+    activeFlag = true;   // Should already be true if the conditions.empty check passes
     isPassTwo = true;
     if (currentSegment != nullptr) {
         throw CasmErrorException("End of file reached before closing ENDS.",
@@ -135,8 +105,8 @@ void AsmState::pass2Setup() {
         throw CasmErrorException("End of file reached before a closing ENDIF.",
                                  currentLine->labelLoc, currentLine->lineText);
     }
-    for (auto &seg: segments) {
-        seg.second.pass2Setup();
+    for (auto& [seg_name, seg]: segments) {
+        seg.pass2Setup();
     }
 }
 
@@ -166,7 +136,7 @@ void AsmState::enterSegment(string &name, SegmentType &seg_type, AlignType &alig
             base_address = value->value;
         }
         if (segments.count(name) == 0) {
-            segments[name] = Segment(name, base_address, seg_type, align_type);
+            segments[name] = Segment(this, name, base_address, seg_type, align_type);
         }
     }
     currentSegment = &segments[name];
@@ -182,7 +152,7 @@ void AsmState::assignSymbol(string &name, Value &value) {
         globals[name] = {name, value};
     }
     else {
-        currentSegment->assignSymbol(name, *this, value);
+        currentSegment->assignSymbol(name, value);
     }
 }
 
@@ -195,29 +165,19 @@ void AsmState::endBlock() {
                                  currentLine->instructionLoc, currentLine->lineText);
 }
 
-void AsmState::defineLabel() {
-    if (!currentLine->label.empty()) {
-        if (currentSegment == nullptr) {
-            throw CasmErrorException("Not currently in a segment.",
-                                     currentLine->labelLoc, currentLine->lineText);
-        }
-        currentSegment->defineLabel(currentLine->label, *this);
-    }
-}
-
 void AsmState::allocateSpace(int size) {
     if (currentSegment == nullptr) {
         throw CasmErrorException("Not currently in a segment.",
                                  currentLine->labelLoc, currentLine->lineText);
     }
-    currentSegment->allocateSpace(size, *this);
+    currentSegment->allocateSpace(size);
 }
 
 void AsmState::startConditionalBlock(bool state) {
     auto level = conditions.empty() ? 0 : conditions.size() - 1;
-    CondItem item = {isActive, globalLine, state, level, false};
+    CondItem item = {activeFlag, globalLine, state, level, false};
     conditions.push_back(item);
-    isActive = isActive ? state : isActive;
+    activeFlag = activeFlag ? state : activeFlag;
     if (condition_starts.count(globalLine) > 0) {
         auto saved_item = condition_starts[globalLine];
         if (saved_item.isActive != item.isActive || saved_item.lineNumber != item.lineNumber ||
@@ -237,7 +197,7 @@ void AsmState::flipConditionalState() {
             throw CasmErrorException("Conditional already has an else.",
                                      currentLine->labelLoc, currentLine->lineText);
         }
-        isActive = !isActive;
+        activeFlag = !activeFlag;
         flip_item.hasElse = true;
     }
 }
@@ -245,7 +205,7 @@ void AsmState::flipConditionalState() {
 void AsmState::endConditionalBlock() {
     auto end_item = conditions.back();
     if (end_item.isActive) {
-        isActive = true;
+        activeFlag = true;
     }
     conditions.pop_back();
 }
@@ -298,7 +258,7 @@ void AsmState::importSymbol(const string &local_name, std::string &symbol_name, 
         throw CasmErrorException("Cannot import outside of a segment.", currentLine->instructionLoc,
                                  currentLine->lineText);
     }
-    currentSegment->importSymbol(local_name, symbol_name, seg_name, currentLine->instructionLoc, *this);
+    currentSegment->importSymbol(local_name, symbol_name, seg_name, currentLine->instructionLoc);
 }
 
 [[maybe_unused]] std::string AsmState::getCurrentSegName() {
@@ -316,12 +276,18 @@ void AsmState::exportSymbol(const string &label_name, const std::string& extern_
                                  currentLine->lineText);
     }
     Value value;
-    if (!(currentSegment->hasLabel(label_name) && currentSegment->resolveSymbol(label_name, value, *this))) {
+    if (!(currentSegment->hasLabel(label_name) && currentSegment->resolveSymbol(label_name, value))) {
         throw CasmErrorException("Label is undefined.", currentLine->instructionLoc,
                                  currentLine->lineText);
     }
     currentSegment->exportSymbol(extern_name, value.value);
 }
 
-
+Segment * AsmState::getCurrentSegment() {
+    if (currentSegment == nullptr) {
+        throw CasmErrorException("Not Currently in a segment.", currentLine->labelLoc,
+                                 currentLine->lineText);
+    }
+    return currentSegment;
+}
 

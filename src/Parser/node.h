@@ -57,7 +57,7 @@ public:
 
     void listTree() const;
     int addChild(short type, std::string str, Location loc);
-    void listTree();
+    void listTree(int level) const;
 };
 
 

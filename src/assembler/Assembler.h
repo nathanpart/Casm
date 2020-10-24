@@ -33,7 +33,8 @@ class Assembler {
     int errorCount = 0;
     int errorLimit = 10;
 
-    std::unique_ptr<AsmState> state;
+    std::shared_ptr<AsmState> state;
+    Line *currentLine;
     std::vector<Line> lines;
     Macro macros;
     std::set<std::string> includeList;

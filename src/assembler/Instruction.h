@@ -19,11 +19,12 @@ class node;
 class Instruction {
 
 protected:
-    CpuOpcodes *opCodes;
+    AsmState &state;
+    CpuOpcodes *opCodes{};
     std::set<CpuType> cpus;
     char immType = 0;
-    CpuMnemonics instruction;
-    uint8_t opCode;
+    CpuMnemonics instruction{};
+    uint8_t opCode{};
 
     bool isImport = false;
     std::string name1;
@@ -31,6 +32,8 @@ protected:
     bool hasDot = false;
     bool isProcessed = false;
 public:
+    explicit Instruction(AsmState &asm_state) : state(asm_state) {}
+
     static void createInstruction(node &inst_node, Line &asm_line);
     static void createGroup1(node &group_node, Line &asm_line);
     static void createGroup2(node &group_node, Line &asm_line);
@@ -50,8 +53,8 @@ public:
     static void createGroup16(node &group_node, Line &asm_line);
 
     void setInstruction(const std::string &inst_str);
-    virtual void pass1(Line &asm_line, AsmState &state);
-    virtual void pass2(Line &asm_line, AsmState &state);
+    virtual void pass1();
+    virtual void pass2();
 };
 
 

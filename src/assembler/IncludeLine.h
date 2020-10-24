@@ -13,7 +13,7 @@ class IncludeLine : public Instruction {
     std::string fileName;
 
 public:
-    explicit IncludeLine(std::string &file_name) : fileName(file_name) {}
+    explicit IncludeLine(AsmState &asm_state, std::string &file_name) : Instruction(asm_state), fileName(file_name) {}
 
     static void createInstruction(node &inst_node, Line &asm_line);
     std::string getName() {

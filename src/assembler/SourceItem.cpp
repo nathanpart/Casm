@@ -12,12 +12,16 @@
 
 using namespace std;
 
-SourceItem::SourceItem(ifstream &file, const string &fileName, SourceType type) {
+SourceItem::SourceItem(const string &fileName, SourceType type) {
     location.locationName = fileName;
     location.lineNumber = 0;
     location.column = 0;
     sourceType = type;
-    sourceStream = make_shared<istream>(file.rdbuf());
+    auto *file_stream = new ifstream(fileName);
+    sourceStream = shared_ptr<istream>(file_stream);
+    if (sourceStream->fail()) {
+        throw CasmErrorException("Unable to open file - " + fileName, location);
+    }
     sourceTokenizer = make_shared<tokenizer>(*sourceStream);
 }
 
@@ -26,7 +30,8 @@ SourceItem::SourceItem(const string& source, string sourceTitle, SourceType type
     location.lineNumber = firstLine;
     location.column = 0;
     sourceType = type;
-    sourceStream = make_shared<istream>(istringstream(source).rdbuf());
+    auto *str_stream = new istringstream(source);
+    sourceStream = shared_ptr<istream>(str_stream);
     sourceTokenizer = make_shared<tokenizer>(*sourceStream);
 }
 

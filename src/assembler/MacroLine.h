@@ -17,6 +17,8 @@ class MacroLine : public Instruction {
     bool isEndMac = false;
 
 public:
+    explicit MacroLine(AsmState &asm_state) : Instruction(asm_state) {}
+
     static void createInstruction(node &macro_node, Line &asm_line);
     [[nodiscard]] bool isDef() const {
         return isDefinition;

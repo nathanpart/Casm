@@ -65,7 +65,8 @@ class Expression {
     void evalTreeLevel(const node& expr_tree);
     void validateChar(ExpressionItem &item);
     static void popBinaryArgs(std::stack<ExpressionItem> &exp_stack, ExpressionItem &lhs, ExpressionItem &rhs);
-    static void popUniArg(std::stack<ExpressionItem> &exp_stack, ExpressionItem &arg);
+
+    [[maybe_unused]] static void popUniArg(std::stack<ExpressionItem> &exp_stack, ExpressionItem &arg);
     void validateArguments(ExpressionItem &lhs, ExpressionItem& rhs, OpType opType);
     void popArgValidate(std::stack<ExpressionItem> &stack, ExpressionItem &lhs);
 public:

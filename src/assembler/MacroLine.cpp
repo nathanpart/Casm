@@ -10,7 +10,7 @@ using namespace std;
 
 
 void MacroLine::createInstruction(node &macro_node, Line &asm_line) {
-    auto macro = make_shared<MacroLine>(MacroLine());
+    auto macro = make_shared<MacroLine>(MacroLine(*asm_line.state));
 
     for (const auto& mac_node: macro_node.child) {
         switch (mac_node.type) {

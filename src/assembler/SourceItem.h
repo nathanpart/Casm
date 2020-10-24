@@ -22,7 +22,7 @@ class SourceItem {
     bool eofFlag = false;
 
 public:
-    SourceItem(std::ifstream &file, const std::string &fileName, SourceType type);
+    SourceItem(const std::string &fileName, SourceType type);
     SourceItem(const std::string& source, std::string sourceTitle, SourceType type, int firstLine = 1);
     SourceItem(const SourceItem& si);
 

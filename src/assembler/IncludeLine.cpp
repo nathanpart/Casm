@@ -9,5 +9,5 @@ using namespace std;
 
 void IncludeLine::createInstruction(node &inst_node, Line &asm_line) {
     string str = inst_node.child.back().str;
-    asm_line.instruction = make_shared<Instruction>(IncludeLine(str));
+    asm_line.instruction = make_shared<IncludeLine>(*asm_line.state, str);
 }

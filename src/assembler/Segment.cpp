@@ -13,7 +13,7 @@
 
 using namespace std;
 
-bool Segment::resolveSymbol(std::string symbol_name, Value &value, AsmState &state) {
+bool Segment::resolveSymbol(std::string symbol_name, Value &value) {
     bool is_absolute;
     if (symbol_name.back() == ':') {
         if (labelTable.findLocal(name, getOffset(), value.value, is_absolute)) {
@@ -64,9 +64,10 @@ void Segment::exportSymbol(const std::string& symbol_name, int offset) {
 }
 
 void Segment::importSymbol(const std::string& local_name, std::string symbol_name, std::string seg_name,
-                           Location &loc, AsmState &state) {
+                           Location &loc) {
     if (hasSymbol(local_name)) {
-        throw CasmErrorException("Symbol name all ready defined.", loc, state.currentLine->lineText);
+        throw CasmErrorException("Symbol name all ready defined.", loc,
+                                 state->getCurrentLine()->lineText);
     }
     imports[local_name] = ImportDeclaration{std::move(symbol_name), std::move(seg_name)};
 }
@@ -141,11 +142,12 @@ void Segment::enterSection(AlignType section_alignment, const Location &loc, con
 
 
 
-void Segment::assignSymbol(string &symbol_name, AsmState &state, Value &value) {
+void Segment::assignSymbol(string &symbol_name, Value &value) {
     if (!isPass2 && (labelTable.hasLabel(symbol_name) || symbols.count(symbol_name) > 0 ||
         imports.count(symbol_name) > 0)) {
+        auto currentLine = state->getCurrentLine();
         throw CasmErrorException("Segment already has a symbol by this name defined.",
-                                 state.currentLine->labelLoc, state.currentLine->lineText);
+                                 currentLine->labelLoc, currentLine->lineText);
     }
     symbols[symbol_name] = {name, value};
 }
@@ -158,8 +160,8 @@ void Segment::enterBlock(int block_address) {
     currentOffset = block_address;
 }
 
-void Segment::defineLabel(string &label_name, AsmState &state) {
-    auto asm_line = state.currentLine;
+void Segment::defineLabel(string &label_name) {
+    auto asm_line = state->getCurrentLine();
     bool var_abs = isAbsolute || currentSection->isBlock;
     if (asm_line->isLocalLabel()) {
         if (labelTable.hasLocal(label_name, currentOffset)) {
@@ -175,29 +177,31 @@ void Segment::defineLabel(string &label_name, AsmState &state) {
         if (labelTable.hasLabel(label_name) || symbols.count(label_name) > 0 ||
             imports.count(label_name) > 0) {
             throw CasmErrorException("Segment already has a symbol by this name defined.",
-                                     state.currentLine->labelLoc, state.currentLine->lineText);
+                                     asm_line->labelLoc, asm_line->lineText);
         }
         labelTable.addLabel(label_name, false, currentOffset, var_abs);
     }
 }
 
-void Segment::allocateSpace(int size, AsmState &state) {
+void Segment::allocateSpace(int size) {
+    auto current_line = state->getCurrentLine();
     if (currentOffset + size > 0xFFFF) {
         throw CasmErrorException("Segment wrap around.",
-                                 state.currentLine->labelLoc, state.currentLine->lineText);
+                                 current_line->labelLoc, current_line->lineText);
     }
     currentOffset += size;
 }
 
-void Segment::endSegment(AsmState &state) {
+void Segment::endSegment() {
+    auto current_line = state->getCurrentLine();
     if (inBlock()) {
         throw CasmErrorException("ENDS encountered while in a sub module block.",
-                                 state.currentLine->labelLoc, state.currentLine->lineText);
+                                 current_line->labelLoc, current_line->lineText);
     }
-    if (state.isPassTwo) {
+    if (state->isPassTwo) {
         if (currentSection->size != currentOffset - currentSection->startAddress) {
             throw CasmErrorException("Phase error - segment section size mismatch.",
-                                     state.currentLine->instructionLoc, state.currentLine->lineText);
+                                     current_line->instructionLoc, current_line->lineText);
         }
     }
     else {

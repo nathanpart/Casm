@@ -15,14 +15,16 @@ enum class SegmentType;
 class Region : public Instruction {
     bool isEndSegment = false;
     std::string segmentName;
-    AlignType alignment;
-    SegmentType segmentType;
+    AlignType alignment{};
+    SegmentType segmentType{};
 
 public:
+    explicit Region(AsmState &asm_state) : Instruction(asm_state) {}
+
     static void createInstruction(node &inst_node, Line &asm_line);
 
-    void pass1(Line &asm_line, AsmState &state) override;
-    void pass2(Line &asm_line, AsmState &state) override;
+    void pass1() override;
+    void pass2() override;
 };
 
 

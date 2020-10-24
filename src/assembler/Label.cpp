@@ -23,6 +23,10 @@ bool Labels::findLocal(const string& name, int refAddress, int &address, bool &i
     vector<Label>::iterator l_begin;
     vector<Label>::iterator l_end;
 
+    if (labels.empty()) {
+        return false;
+    }
+
     tie(l_begin, l_end) = findLocalRange(refAddress);
     for (auto it = l_begin; it != l_end; it++) {
         if (it->isLocal && it->name == name) {
@@ -63,13 +67,15 @@ Labels::findLocalRange(int refAdr) {
     int global_low = low_location->address;
 
     for (auto it = labels.begin(); it != labels.end(); it++) {
-        if ((!it->isLocal) && it->address > global_low) {
-            low_location = it;
-            global_low = it->address;
-        }
-        if ((!it->isLocal) && it->address >= refAdr) {
-            it++;
-            return pair<vector<Label>::iterator, vector<Label>::iterator>(low_location, it);
+        if (!it->isLocal) {
+            if (it->address >= refAdr) {
+                it++;
+                return pair<vector<Label>::iterator, vector<Label>::iterator>(low_location, it);
+            }
+            if (it->address > global_low) {
+                low_location = it;
+                global_low = it->address;
+            }
         }
     }
     return pair<vector<Label>::iterator, vector<Label>::iterator>(low_location, labels.end());

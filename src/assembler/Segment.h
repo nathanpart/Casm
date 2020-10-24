@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <memory>
 
 #include "Expression.h"
 #include "Label.h"
@@ -46,6 +47,7 @@ using SectionList = std::vector<SegmentArea>;
 
 
 class Segment {
+    AsmState *state;
     std::string name;
     int baseAddress;
     SegmentType type;
@@ -65,15 +67,17 @@ class Segment {
 
     bool isPass2 = false;
 public:
-    explicit Segment(std::string seg_name = "", int base_address = 0, SegmentType seg_type = SegmentType::normal,
-            AlignType align_type = AlignType::byte) :
-            name(std::move(seg_name)), baseAddress(base_address), type(seg_type), alignType(align_type),
-            isAbsolute(seg_type == SegmentType::absolute), currentOffset(0){}
+    Segment() : state(nullptr), baseAddress(0), type(SegmentType::normal), alignType(AlignType::para),
+        isAbsolute(true), currentOffset(0) {}
+    explicit Segment(AsmState *asm_state, std::string seg_name = "", int base_address = 0,
+                     SegmentType seg_type = SegmentType::normal, AlignType align_type = AlignType::byte) :
+            state(asm_state), name(std::move(seg_name)), baseAddress(base_address), type(seg_type),
+            alignType(align_type), isAbsolute(seg_type == SegmentType::absolute), currentOffset(0) {}
 
-    bool resolveSymbol(std::string symbol_name, Value &value, AsmState &state);
+    bool resolveSymbol(std::string symbol_name, Value &value);
     void exportSymbol(const std::string& symbol_name, int offset);
     void importSymbol(const std::string& local_name, std::string symbol_name, std::string seg_name,
-                      Location &loc, AsmState &state);
+                      Location &loc);
     bool hasSymbol(const std::string& sym_name);
     bool hasLabel(const std::string& sym_name) { return labelTable.hasLabel(sym_name); }
     [[nodiscard]] int getOffset() const {
@@ -83,12 +87,12 @@ public:
         return isAbsolute ? currentOffset + baseAddress : currentOffset;
     }
     void enterSection(AlignType section_alignment, const Location &loc, const std::string &line);
-    void endSegment(AsmState &state);
-    void assignSymbol(std::string &symbol_name, AsmState &state, Value &value);
+    void endSegment();
+    void assignSymbol(std::string &symbol_name, Value &value);
     void enterBlock(int block_address);
     bool inBlock() { return currentSection->isBlock; }
-    void defineLabel(std::string &label_name, AsmState &state);
-    void allocateSpace(int size, AsmState &state);
+    void defineLabel(std::string &label_name);
+    void allocateSpace(int size);
     void storeByte(uint8_t byt) { currentSection->objectCode.push_back(byt); }
     void pass2Setup();
     void addRelocationEntry(const Value& value, int operand_size, const Location& loc, const std::string& line_text);

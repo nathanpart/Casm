@@ -53,10 +53,10 @@ int getAddressModeSize(AddressModes mode, AsmState &state, char imm_operand_size
             if (state.cpuType != CpuType::CPU_65C816) {
                 return 1;
             }
-            if (state.currentLine->hasWide) {
+            if (state.getCurrentLine()->hasWide) {
                 return 2;
             }
-            if (state.currentLine->hasShort) {
+            if (state.getCurrentLine()->hasShort) {
                 return 1;
             }
             if (imm_operand_size == 'A') {
@@ -108,7 +108,7 @@ int getAddressModeSize(AddressModes mode, AsmState &state, char imm_operand_size
 void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {
     switch (mode) {
         case AddressModes::imm:
-            storeImmediate(*state.currentLine, state, imm_operand_size);
+            storeImmediate(*state.getCurrentLine(), state, imm_operand_size);
             break;
         case AddressModes::dp:
         case AddressModes::dp_ind:
@@ -120,7 +120,7 @@ void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {
         case AddressModes::dp_ind_long_y:
         case AddressModes::sr:
         case AddressModes::sr_ind_y:
-            storeByte(state.currentLine->expressionList.front(), *state.currentLine, state);
+            storeByte(state.getCurrentLine()->expressionList.front(), *state.getCurrentLine(), state);
             break;
         case AddressModes::abs:
         case AddressModes::abs_x:
@@ -129,23 +129,23 @@ void writeOperand(AddressModes mode, AsmState &state, char imm_operand_size) {
         case AddressModes::abs_ind:
         case AddressModes::abs_ind_x:
         case AddressModes::abs_ind_long:
-            storeAbsolute(state.currentLine->expressionList.front(), *state.currentLine, state);
+            storeAbsolute(state.getCurrentLine()->expressionList.front(), *state.getCurrentLine(), state);
             break;
         case AddressModes::rel:
-            storeRelative(state.currentLine->expressionList.front(), *state.currentLine, state);
+            storeRelative(state.getCurrentLine()->expressionList.front(), *state.getCurrentLine(), state);
             break;
         case AddressModes::rel_long:
-            storeRelativeLong(*state.currentLine, state);
+            storeRelativeLong(*state.getCurrentLine(), state);
             break;
         case AddressModes::block:
-            storeBlock(*state.currentLine, state);
+            storeBlock(*state.getCurrentLine(), state);
             break;
         case AddressModes::dp_rel:
-            storeByteAndRelative(*state.currentLine, state);
+            storeByteAndRelative(*state.getCurrentLine(), state);
             break;
         case AddressModes::abs_long:
         case AddressModes::abs_long_x:
-            storeLong(state.currentLine->expressionList.front(), *state.currentLine, state);
+            storeLong(state.getCurrentLine()->expressionList.front(), *state.getCurrentLine(), state);
         default:
             ;               // accumulator & implied addressing modes have no operand
     }

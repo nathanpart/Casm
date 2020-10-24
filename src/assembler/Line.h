@@ -24,6 +24,8 @@ struct ExpItem {
 };
 
 struct Line {
+    std::shared_ptr<AsmState> state;
+
     std::string lineText;
     Location location;
 
@@ -50,6 +52,8 @@ struct Line {
     bool isVariable() { return !label.empty() && label.back() == '&'; }
     [[nodiscard]] bool hasLabel() const { return !label.empty(); }
     bool normalLabel() { return !label.empty() && label.back() != ':' && label.back() != '&'; }
+    void pass1();
+    void pass2();
 };
 
 

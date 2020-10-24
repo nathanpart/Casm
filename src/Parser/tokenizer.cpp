@@ -97,7 +97,7 @@ int eval_numeric(string &work_line, short &type, string &str, int &length) {
     if (not regex_search(work_line, results, dec_pattern))
         if (not regex_search(work_line, results, oct_pattern))
             if (not regex_search(work_line, results, bin_pattern))
-                if (not regex_match(work_line, results, hex_pattern))
+                if (not regex_search(work_line, results, hex_pattern))
                     return 0;
     str = results.str();
     length = results.length();

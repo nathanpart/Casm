@@ -15,7 +15,7 @@
 using namespace std;
 
 void Region::createInstruction(node &inst_node, Line &asm_line){
-    auto *region_line = new Region();
+    auto *region_line = new Region(*asm_line.state);
     for (const auto& region_item: inst_node.child) {
         Expression expression;
         switch (region_item.type) {
@@ -67,10 +67,11 @@ void Region::createInstruction(node &inst_node, Line &asm_line){
     asm_line.instruction = unique_ptr<Instruction>(region_line);
 }
 
-void Region::pass1(Line &asm_line, AsmState &state) {
+void Region::pass1() {
+    auto asm_line = state.getCurrentLine();
     if (isEndSegment) {
         if (!state.inSegment()) {
-            throw CasmErrorException("Not currently is a segment.", asm_line.instructionLoc, asm_line.lineText);
+            throw CasmErrorException("Not currently is a segment.", asm_line->instructionLoc, asm_line->lineText);
         }
         state.endSegment();
         return;
@@ -78,6 +79,6 @@ void Region::pass1(Line &asm_line, AsmState &state) {
     state.enterSegment(segmentName, segmentType, alignment);
 }
 
-void Region::pass2(Line &asm_line, AsmState &state) {
-    pass1(asm_line, state);
+void Region::pass2() {
+    pass1();
 }

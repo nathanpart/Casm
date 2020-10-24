@@ -22,7 +22,7 @@ void Instruction::createGroup1(node &group_node, Line &asm_line) {
     bool isIndirectLong = false;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (auto& child_node: group_node.child) {
         node *work_ptr = &child_node;
@@ -137,7 +137,7 @@ void Instruction::createGroup2(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (group_node.type) {
@@ -185,7 +185,7 @@ void Instruction::createGroup3(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -242,7 +242,7 @@ void Instruction::createGroup4(node &group_node, Line &asm_line) {
     string inst;
     bool hasXIndex = false;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -298,7 +298,7 @@ void Instruction::createGroup5(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -345,7 +345,7 @@ void Instruction::createGroup6(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -379,7 +379,7 @@ void Instruction::createGroup7(node &group_node, Line &asm_line) {
     Expression expression;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -411,7 +411,7 @@ void Instruction::createGroup8(node &group_node, Line &asm_line) {
     bool hasXIndex;
     bool hasSIndex;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (auto& child_node: group_node.child) {
         node *exp_node = &child_node;
@@ -463,7 +463,7 @@ void Instruction::createGroup10(node &group_node, Line &asm_line) {
     bool isIndirect = false;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (auto& child_node: group_node.child) {
         node *exp_node = &child_node;
@@ -502,7 +502,7 @@ void Instruction::createGroup11(node &group_node, Line &asm_line) {
     Expression expression;
     bool hasYIndex = false;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -555,7 +555,7 @@ void Instruction::createGroup12(node &group_node, Line &asm_line) {
     Expression expression;
     bool hasYIndex = false;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -590,7 +590,7 @@ void Instruction::createGroup13(node &group_node, Line &asm_line) {
     bool hasXIndex = false;
     string inst;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
 
     for (const auto& child_node: group_node.child) {
         switch (child_node.type) {
@@ -621,7 +621,7 @@ void Instruction::createGroup13(node &group_node, Line &asm_line) {
 }
 
 void Instruction::createGroup14(node &group_node, Line &asm_line) {
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
     const auto& child_node = group_node.child[0];
     smatch results;
     cpu_instr->setInstruction(child_node.str);
@@ -635,7 +635,7 @@ void Instruction::createGroup15(node &group_node, Line &asm_line) {
     bool hasXIndex;
     bool hasSIndex;
 
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
     cpu_instr->setInstruction(group_node.str);
     node *exp_node = &group_node.child[1];
     isIndirect = isExpTreeIndirect(exp_node, hasXIndex, hasSIndex);
@@ -662,7 +662,7 @@ void Instruction::createGroup15(node &group_node, Line &asm_line) {
 void Instruction::createGroup16(node &group_node, Line &asm_line) {
     Expression expression;
     smatch results;
-    auto cpu_instr = make_shared<Instruction>();
+    auto cpu_instr = make_shared<Instruction>(*asm_line.state);
     cpu_instr->setInstruction(group_node.child.front().str);
     asm_line.instruction = cpu_instr;
     const auto& exp_node = group_node.child.back();

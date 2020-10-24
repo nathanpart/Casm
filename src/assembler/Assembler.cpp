@@ -20,20 +20,29 @@ using namespace std;
 
 Assembler::Assembler() {
     cpuInstrMapInit();
-    state = make_unique<AsmState>();
+    currentLine = nullptr;
+    state = make_shared<AsmState>(currentLine);
 }
 
 
 void Assembler::assemble(const string& file_name) {
     ifstream source = ifstream(file_name);
     pre_process(source, file_name);
+    if (errorCount > 0) return;
     pass1();
     pass2();
 }
 
 void Assembler::pre_process(ifstream &source_stream, const string& name) {
     Line current_line;
-    sourceStack.push(SourceItem(source_stream, name, SourceType::MAIN_FILE));
+    try {
+        sourceStack.push(SourceItem(name, SourceType::MAIN_FILE));
+    }
+    catch (CasmErrorException &ce) {
+        printErrorMsg(ce.what(), ce.getLocation(), ce.getLine());
+        errorCount = errorLimit + 1;
+        return;
+    }
 
     while (!sourceStack.empty()) {
         try {
@@ -42,6 +51,7 @@ void Assembler::pre_process(ifstream &source_stream, const string& name) {
 
             tie(tree, line_text) = sourceStack.top().getParsedLine();
             current_line = Line();
+            current_line.state = state;
             current_line.location = sourceStack.top().getLocation();
             current_line.lineText = line_text;
             if (current_line.fromTree(*tree)) {
@@ -68,12 +78,7 @@ void Assembler::pre_process(ifstream &source_stream, const string& name) {
                                                  sourceStack.top().getLocation(), line_text);
                     }
                     includeList.insert(file_name);
-                    ifstream include_file = ifstream(file_name);
-                    if (include_file.fail()) {
-                        throw CasmErrorException("Unable to open include file.",
-                                                 sourceStack.top().getLocation(), line_text);
-                    }
-                    auto include_source = SourceItem(include_file, file_name, SourceType::INCLUDE);
+                    auto include_source = SourceItem(file_name, SourceType::INCLUDE);
                     sourceStack.push(include_source);
                 }
                 else {
@@ -97,14 +102,17 @@ void Assembler::pre_process(ifstream &source_stream, const string& name) {
 
 void Assembler::pass1() {
     for (auto &current_line: lines) {
+        currentLine = &current_line;
+        state->incrGlobalLineNumber();
         try {
-            state->pass1(current_line);
+            currentLine->pass1();
         }
         catch (CasmErrorException &ce) {
             printErrorMsg(ce.what(), ce.getLocation(), ce.getLine());
             errorCount++;
-            if (errorCount > errorLimit)
+            if (errorCount > errorLimit) {
                 return;
+            }
         }
     }
 }
@@ -118,15 +126,19 @@ void Assembler::pass2() {
         errorCount++;
         return;
     }
+
     for (auto &current_line: lines) {
+        currentLine = &current_line;
+        state->incrGlobalLineNumber();
         try {
-            state->pass2(current_line);
+            currentLine->pass2();
         }
         catch (CasmErrorException &ce) {
             printErrorMsg(ce.what(), ce.getLocation(), ce.getLine());
             errorCount++;
-            if (errorCount > errorLimit)
+            if (errorCount > errorLimit) {
                 return;
+            }
         }
     }
 }

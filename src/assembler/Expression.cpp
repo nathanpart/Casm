@@ -209,7 +209,7 @@ void Expression::popBinaryArgs(stack<ExpressionItem> &exp_stack, ExpressionItem 
     exp_stack.pop();
 }
 
-void Expression::popUniArg(stack<ExpressionItem> &exp_stack, ExpressionItem &arg) {
+[[maybe_unused]] void Expression::popUniArg(stack<ExpressionItem> &exp_stack, ExpressionItem &arg) {
     arg = exp_stack.top();
     exp_stack.pop();
 }
