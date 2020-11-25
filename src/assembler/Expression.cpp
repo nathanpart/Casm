@@ -17,7 +17,7 @@ using namespace std;
 static void evaluateString(ExpressionItem &exp_item, string &line_text);
 
 [[maybe_unused]] void Expression::buildRpnList(const node &expr_tree, string &line_text) {
-    lineText = move(line_text);
+    lineText = line_text;
     evalTreeLevel(expr_tree);
 }
 
@@ -181,6 +181,7 @@ void Expression::evalTreeLevel(const node &expr_tree) {
                     op.value = num;
                     op.value.external = false;
                     op.value.type = ValueType::absolute;
+                    rpnList.push_back(op);
                     break;
                 default:
                     ;        // Only the ( and ) should land here and we don't need to do anything with them
@@ -255,7 +256,7 @@ void Expression::popArgValidate(stack<ExpressionItem> &stack, ExpressionItem &lh
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "hicpp-signed-bitwise"
-void Expression::evaluate(AsmState &state) {
+void Expression::evaluate(AsmStateInterface &state) {
     stack<ExpressionItem> args;
 
     if (rpnList.size() == 1 && rpnList.front().type == ExpItemType::str) {
@@ -489,14 +490,14 @@ void Expression::evaluate(AsmState &state) {
     expString.reset();
 }
 
-ExpValue Expression::getValue(AsmState &state) {
+ExpValue Expression::getValue(AsmStateInterface &state) {
     if (!evaluated) {
         evaluate(state);
     }
     return expValue;
 }
 
-ExpString Expression::getString(AsmState &state) {
+ExpString Expression::getString(AsmStateInterface &state) {
     if (!evaluated) {
         evaluate(state);
     }

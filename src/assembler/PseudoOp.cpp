@@ -45,7 +45,7 @@ void PseudoOp::createInstruction(node &pseudo_node, Line &asm_line) {
                     case DA:
                         op->pseudoOp = def_node.type;
                         break;
-                    case exp:
+                    case expr:
                         addExpr(def_node, asm_line, false);
                         break;
                 }

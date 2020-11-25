@@ -55,8 +55,8 @@ public:
         assert(req_type == type);
     }
 
-    void listTree() const;
     int addChild(short type, std::string str, Location loc);
+    void listTree() const;
     void listTree(int level) const;
 };
 

@@ -38,7 +38,7 @@ enum class OpType {plus, minus, multiply, divide, mod, positive, negative, log_n
     shift_left, shift_right, log_and, log_xor, log_or, less, greater, equal, not_equal, greater_equal, less_equal,
     rel_not, rel_and, rel_or, low_word};
 
-class AsmState;
+class AsmStateInterface;
 
 struct ExpressionItem {
     ExpItemType type;
@@ -71,9 +71,9 @@ class Expression {
     void popArgValidate(std::stack<ExpressionItem> &stack, ExpressionItem &lhs);
 public:
     [[maybe_unused]] void buildRpnList(const node& expr_tree, std::string &line_text);
-    void evaluate(AsmState &state);
-    ExpValue getValue(AsmState &state);
-    ExpString getString(AsmState &state);
+    void evaluate(AsmStateInterface &state);
+    ExpValue getValue(AsmStateInterface &state);
+    ExpString getString(AsmStateInterface &state);
 };
 
 

@@ -1,0 +1,43 @@
+
+WHITE EQU 15
+
+zp_vars SEGMENT ZP $02
+screen    DW  0
+color     DW  0
+str       DW  0
+zp_vars ENDS
+
+code SEGMENT BYTE $1300
+
+start  lda #$00
+       sta screen
+       sta color
+       lda #$04
+       sta screen + 1
+       lda #$D8
+       sta color + 1
+       lda #<hello
+       sta str
+       lda #>hello
+       sta str + 1
+
+       ldy #0
+       lda (str),y
+       tax
+       inc str
+
+loop:  lda (str),y
+       sta (screen),y
+
+       lda  #WHITE
+       sta  (color),y
+
+       iny
+       dex
+       bne loop:
+
+       ret
+
+hello DB 11, 'hello world'
+
+code ENDS

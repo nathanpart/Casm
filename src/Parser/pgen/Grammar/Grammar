@@ -2,34 +2,34 @@ line: [label] [op_code | pseudo_op | variable | region | macro | include | exter
 
 external: IMPORT extern_addr | EXPORT extern_addr
 label: NAME [ ':' | '?']
-variable: ('=' | EQU) exp
-region: SEGMENT [BYTE | WORD | DWORD | PARA | PAGE] [ABS | DP | ZP | STORAGE] [exp] | ENDS
+variable: ('=' | EQU) expr
+region: SEGMENT [BYTE | WORD | DWORD | PARA | PAGE] [ABS | DP | ZP | STORAGE] [expr] | ENDS
 macro: '.' NAME ARG (',' ARG)* | MACRO | ENDM
 include: INCLUDE STRING
 
 op_code: (group1 | group2  | group3 | group4 | group5 | group6  | group7 | group8 |
           group9 | group10 | group11 | group12 | group13 | group14 | group15 | group16)
 
-group1: GROUP1_INST (imm_exp | [LONG | DP | ZP] exp [xys_index] | long_ind_exp)
-group2: GROUP2_INST ([AREG | [DP | ZP] exp [x_index]])
-group3: GROUP3_INST ([LONG | DP | ZP] exp)
-group4: GROUP4_INST (imm_exp | [DP | ZP] exp [x_index])
-group5: GROUP5_INST (imm_exp | [DP | ZP] exp)
+group1: GROUP1_INST (imm_exp | [LONG | DP | ZP] expr [xys_index] | long_ind_exp)
+group2: GROUP2_INST ([AREG | [DP | ZP] expr [x_index]])
+group3: GROUP3_INST ([LONG | DP | ZP] expr)
+group4: GROUP4_INST (imm_exp | [DP | ZP] expr [x_index])
+group5: GROUP5_INST (imm_exp | [DP | ZP] expr)
 group6: GROUP6_INST imm_exp
-group7: GROUP7_INST exp ',' exp
-group8: GROUP8_INST ([LONG] exp | jmp_long_ind_exp)
-group9: GROUP9_INST ([LONG] exp | jmp_long_ind_exp)
-group10: GROUP10_INST [LONG] exp
-group11: GROUP11_INST (imm_exp | [DP | ZP] exp [y_index])
-group12: GROUP12_INST [DP | ZP] exp [y_index]
-group13: GROUP13_INST [DP | ZP] exp [x_index]
+group7: GROUP7_INST expr ',' expr
+group8: GROUP8_INST ([LONG] expr | jmp_long_ind_exp)
+group9: GROUP9_INST ([LONG] expr | jmp_long_ind_exp)
+group10: GROUP10_INST [LONG] expr
+group11: GROUP11_INST (imm_exp | [DP | ZP] expr [y_index])
+group12: GROUP12_INST [DP | ZP] expr [y_index]
+group13: GROUP13_INST [DP | ZP] expr [x_index]
 group14: GROUP14_INST
-group15: GROUP15_INST exp
-group16: GROUP16_INST [['#'] exp]
+group15: GROUP15_INST expr
+group16: GROUP16_INST [['#'] expr]
 
-imm_exp: [WIDE | SHORT] '#' exp
-long_ind_exp: '[' exp ']' [y_index]
-jmp_long_ind_exp: '[' exp ']'
+imm_exp: [WIDE | SHORT] '#' expr
+long_ind_exp: '[' expr ']' [y_index]
+jmp_long_ind_exp: '[' expr ']'
 
 x_index: ',' XREG
 y_index: ',' YREG
@@ -42,7 +42,7 @@ xys_index: ',' (XREG | YREG | SREG)
 symbol: NAME [(':' | '&') | '.' [NAME]] | '.' NAME
 extern_addr: NAME ['.' [NAME]] | '.' [NAME]
 
-exp: and_cond ('||' and_cond)*
+expr: and_cond ('||' and_cond)*
 and_cond: not_cond ('&&' not_cond)*
 not_cond: '!' not_cond | comparison
 comparison: or_exp (comp_op or_exp)*
@@ -54,19 +54,18 @@ shift_expr: arith_expr (('<<' | '>>') arith_expr)*
 arith_expr: term (('+' | '-') term)*
 term: factor (('*' | '/' | '%') factor)*
 factor: ('+' | '-' | '~' | '<' | '>' | '>>' | '<<') factor | atom
-atom: ('(' exp [xs_index] ')') | STRING | NUMBER | symbol | '*'
+atom: ('(' expr [xs_index] ')') | STRING | NUMBER | symbol | '*'
 
 pseudo_op: (CPU6502 | CPU65C02 | CPU65C816 | WIDEA | SHORTA | WIDEXY | SHORTXY | define_byte | define_word |
             define_storage | align | block | END_BLOCK | if_def | iff | ELSE | ENDIF )
 
-define_byte: DB exp (',' exp)*
-define_word: (DW | DBW | DA) exp (',' exp)*
-define_storage: DS exp
+define_byte: DB expr (',' expr)*
+define_word: (DW | DBW | DA) expr (',' expr)*
+define_storage: DS expr
 align: ALIGN (BYTE | WORD | DWORD | PARA | PAGE)
-block: BLOCK exp
+block: BLOCK expr
 
 if_def: (IFDEF | IFNDEF) symbol
-iff: IF exp
-
+iff: IF expr
 
 

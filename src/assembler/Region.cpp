@@ -54,7 +54,7 @@ void Region::createInstruction(node &inst_node, Line &asm_line){
             case STORAGE:
                 region_line->segmentType = SegmentType::storage;
                 break;
-            case exp:
+            case expr:
                 expression.buildRpnList(region_item, asm_line.lineText);
                 asm_line.expressionList.push_back({region_item.location, expression});
                 break;
